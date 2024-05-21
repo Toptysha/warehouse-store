@@ -1,0 +1,164 @@
+const express = require("express");
+const {
+  addProduct,
+  getProducts,
+  getProduct,
+  deleteProduct,
+  editProduct,
+} = require("../controllers/product");
+const {
+  addPhotos,
+  getCovers,
+  getCover,
+  getMeasurements,
+  deletePhoto,
+} = require("../controllers/photos");
+const authenticated = require("../middlewares/authenticated");
+const hasRole = require("../middlewares/hasRole");
+const ROLES = require("../constants/roles");
+const mapProduct = require("../helpers/mapProduct");
+
+const multer = require("multer");
+
+const upload = multer();
+
+const router = express.Router({ mergeParams: true });
+
+router.post("/", authenticated, hasRole([ROLES.ADMIN]), async (req, res) => {
+  try {
+    const newProduct = await addProduct({
+      article: req.body.article,
+      brand: req.body.brand,
+      name: req.body.name,
+      color: req.body.color,
+      price: req.body.price,
+      sizes: req.body.sizes,
+    });
+
+    res.send({ data: newProduct });
+  } catch (err) {
+    res.send({ error: err.message || "Unknown Error" });
+  }
+});
+
+router.get("/", authenticated, hasRole([ROLES.ADMIN]), async (req, res) => {
+  try {
+    const { products, lastPage } = await getProducts(
+      req.query.search,
+      req.query.limit,
+      req.query.page
+    );
+    const coversUrls = await getCovers(products);
+    res.send({
+      error: null,
+      data: { products: products.map(mapProduct), coversUrls, lastPage },
+    });
+  } catch (err) {
+    res.send({ error: err.message || "Unknown Error" });
+  }
+});
+
+router.get("/:id", authenticated, hasRole([ROLES.ADMIN]), async (req, res) => {
+  try {
+    const product = await getProduct(req.params.id);
+    const coversUrls = await getCover(req.params.id);
+    const measurementsUrls = await getMeasurements(req.params.id);
+    res.send({
+      error: null,
+      data: { product: mapProduct(product), coversUrls, measurementsUrls },
+    });
+  } catch (err) {
+    res.send({ error: err.message || "Unknown Error" });
+  }
+});
+
+router.delete(
+  "/:id",
+  authenticated,
+  hasRole([ROLES.ADMIN]),
+  async (req, res) => {
+    try {
+      await deleteProduct(req.params.id);
+      res.send({ error: null, data: "Product was deleted" });
+    } catch (err) {
+      res.send({ error: err.message || "Unknown Error" });
+    }
+  }
+);
+
+router.patch(
+  "/:id",
+  authenticated,
+  hasRole([ROLES.ADMIN]),
+  async (req, res) => {
+    if (req.body.covers) {
+      try {
+        await addPhotos(req.params.id, {
+          covers: req.body.covers,
+          measurements: req.body.measurements,
+        });
+        res.send({ data: "Photos was updated" });
+      } catch (err) {
+        res.send({ error: err.message || "Unknown Error" });
+      }
+    } else {
+      try {
+        const updatedProduct = await editProduct(req.params.id, {
+          brand: req.body.brand,
+          name: req.body.name,
+          color: req.body.color,
+          price: req.body.price,
+          sizes: req.body.sizes,
+        });
+        res.send({ data: updatedProduct });
+      } catch (err) {
+        res.send({ error: err.message || "Unknown Error" });
+      }
+    }
+  }
+);
+
+router.post(
+  "/photos",
+  authenticated,
+  hasRole([ROLES.ADMIN]),
+  upload.any(),
+  async (req, res) => {
+    try {
+      await addPhotos({
+        photos: req.files,
+        folder: req.body.folder,
+        typePhotos: req.body.typePhotos,
+        currentSize: req.body.currentSize,
+      });
+      res.send({ data: "Success" });
+    } catch (err) {
+      res.send({ error: err.message || "Unknown Error" });
+    }
+  }
+);
+
+router.post(
+  "/delete-photo",
+  authenticated,
+  hasRole([ROLES.ADMIN]),
+  async (req, res) => {
+    console.log(req.body.fileName);
+    console.log(req.body.sizeName);
+    console.log(req.body.typeOfPhoto);
+    console.log(req.body.id);
+    try {
+      await deletePhoto({
+        fileName: req.body.fileName,
+        sizeName: req.body.sizeName,
+        typeOfPhoto: req.body.typeOfPhoto,
+        id: req.body.id,
+      });
+      res.send({ data: "Photo was deleted" });
+    } catch (err) {
+      res.send({ error: err.message || "Unknown Error" });
+    }
+  }
+);
+
+module.exports = router;
