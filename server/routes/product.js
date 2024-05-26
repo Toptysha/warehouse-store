@@ -15,7 +15,7 @@ const {
 } = require("../controllers/photos");
 const authenticated = require("../middlewares/authenticated");
 const hasRole = require("../middlewares/hasRole");
-const ROLES = require("../constants/roles");
+const ACCESS = require("../constants/access");
 const mapProduct = require("../helpers/mapProduct");
 
 const multer = require("multer");
@@ -24,58 +24,73 @@ const upload = multer();
 
 const router = express.Router({ mergeParams: true });
 
-router.post("/", authenticated, hasRole([ROLES.ADMIN]), async (req, res) => {
-  try {
-    const newProduct = await addProduct({
-      article: req.body.article,
-      brand: req.body.brand,
-      name: req.body.name,
-      color: req.body.color,
-      price: req.body.price,
-      sizes: req.body.sizes,
-    });
+router.post(
+  "/",
+  authenticated,
+  hasRole(ACCESS.EDIT_PRODUCTS),
+  async (req, res) => {
+    try {
+      const newProduct = await addProduct({
+        article: req.body.article,
+        brand: req.body.brand,
+        name: req.body.name,
+        color: req.body.color,
+        price: req.body.price,
+        sizes: req.body.sizes,
+      });
 
-    res.send({ data: newProduct });
-  } catch (err) {
-    res.send({ error: err.message || "Unknown Error" });
+      res.send({ data: newProduct });
+    } catch (err) {
+      res.send({ error: err.message || "Unknown Error" });
+    }
   }
-});
+);
 
-router.get("/", authenticated, hasRole([ROLES.ADMIN]), async (req, res) => {
-  try {
-    const { products, lastPage } = await getProducts(
-      req.query.search,
-      req.query.limit,
-      req.query.page
-    );
-    const coversUrls = await getCovers(products);
-    res.send({
-      error: null,
-      data: { products: products.map(mapProduct), coversUrls, lastPage },
-    });
-  } catch (err) {
-    res.send({ error: err.message || "Unknown Error" });
+router.get(
+  "/",
+  authenticated,
+  hasRole(ACCESS.WATCH_PRODUCTS),
+  async (req, res) => {
+    try {
+      const { products, lastPage } = await getProducts(
+        req.query.search,
+        req.query.limit,
+        req.query.page
+      );
+      const coversUrls = await getCovers(products);
+      res.send({
+        error: null,
+        data: { products: products.map(mapProduct), coversUrls, lastPage },
+      });
+    } catch (err) {
+      res.send({ error: err.message || "Unknown Error" });
+    }
   }
-});
+);
 
-router.get("/:id", authenticated, hasRole([ROLES.ADMIN]), async (req, res) => {
-  try {
-    const product = await getProduct(req.params.id);
-    const coversUrls = await getCover(req.params.id);
-    const measurementsUrls = await getMeasurements(req.params.id);
-    res.send({
-      error: null,
-      data: { product: mapProduct(product), coversUrls, measurementsUrls },
-    });
-  } catch (err) {
-    res.send({ error: err.message || "Unknown Error" });
+router.get(
+  "/:id",
+  authenticated,
+  hasRole(ACCESS.WATCH_PRODUCTS),
+  async (req, res) => {
+    try {
+      const product = await getProduct(req.params.id);
+      const coversUrls = await getCover(req.params.id);
+      const measurementsUrls = await getMeasurements(req.params.id);
+      res.send({
+        error: null,
+        data: { product: mapProduct(product), coversUrls, measurementsUrls },
+      });
+    } catch (err) {
+      res.send({ error: err.message || "Unknown Error", errorPath: err.path });
+    }
   }
-});
+);
 
 router.delete(
   "/:id",
   authenticated,
-  hasRole([ROLES.ADMIN]),
+  hasRole(ACCESS.DELETE_PRODUCTS),
   async (req, res) => {
     try {
       await deleteProduct(req.params.id);
@@ -89,7 +104,7 @@ router.delete(
 router.patch(
   "/:id",
   authenticated,
-  hasRole([ROLES.ADMIN]),
+  hasRole(ACCESS.EDIT_PRODUCTS),
   async (req, res) => {
     if (req.body.covers) {
       try {
@@ -121,7 +136,7 @@ router.patch(
 router.post(
   "/photos",
   authenticated,
-  hasRole([ROLES.ADMIN]),
+  hasRole(ACCESS.EDIT_PRODUCTS),
   upload.any(),
   async (req, res) => {
     try {
@@ -141,12 +156,8 @@ router.post(
 router.post(
   "/delete-photo",
   authenticated,
-  hasRole([ROLES.ADMIN]),
+  hasRole(ACCESS.DELETE_PRODUCTS),
   async (req, res) => {
-    console.log(req.body.fileName);
-    console.log(req.body.sizeName);
-    console.log(req.body.typeOfPhoto);
-    console.log(req.body.id);
     try {
       await deletePhoto({
         fileName: req.body.fileName,

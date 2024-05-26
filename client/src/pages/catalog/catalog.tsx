@@ -1,13 +1,18 @@
 import noImage from '../../images/no_img.jpg';
 import styled from 'styled-components';
 import { ProductCard } from './components';
-import { Button, Search } from '../../components';
+import { Button, Loader, PrivateContent, Search } from '../../components';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { request } from '../../utils';
 import { Pagination } from '../../components';
 import { PAGINATION_LIMIT } from '../../constants';
 import { Product } from '../../interfaces';
+import { useAppDispatch } from '../../redux/store';
+import { closeLoader } from '../../redux/reducers';
+import { useSelector } from 'react-redux';
+import { selectApp } from '../../redux/selectors';
+import { ACCESS } from '../../constants/access';
 
 export const Catalog = () => {
 	const [products, setProducts] = useState<Product[]>([]);
@@ -20,12 +25,22 @@ export const Catalog = () => {
 
 	const navigate = useNavigate();
 
+	const dispatch = useAppDispatch();
+	const loader = useSelector(selectApp).loader;
+
 	useEffect(() => {
-		request(`/products?search=${searchPhrase}&page=${page}&limit=${PAGINATION_LIMIT}`).then(({ data }) => {
-			setProducts(data.products);
-			setLastPage(data.lastPage);
-			setImages(data.coversUrls);
-			// console.log(data.products);
+		request(`/products?search=${searchPhrase}&page=${page}&limit=${PAGINATION_LIMIT}`).then(({ error, data }) => {
+			if (error) {
+				console.log('/catalog', error);
+				// dispatch(setError(error));
+				dispatch(closeLoader());
+			} else {
+				console.log('/catalog', data);
+				setProducts(data.products);
+				setLastPage(data.lastPage);
+				setImages(data.coversUrls);
+				dispatch(closeLoader());
+			}
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [page, shouldSearch, needRefreshPage]);
@@ -52,32 +67,36 @@ export const Catalog = () => {
 		return stackProducts;
 	};
 
-	return (
-		<CatalogContainer>
-			<div className="products-panel">
-				<Search
-					searchPhrase={searchPhrase}
-					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchPhrase(event.target.value)}
-					onClick={() => setShouldSearch(!shouldSearch)}
-					width="500px"
-				/>
-				<Button className="add-product-button" description="Добавить товар" onClick={() => navigate('/catalog/create-product')} />
-			</div>
-			<div className="products-container">
-				{products.length > 0 ? (
-					products.length === PAGINATION_LIMIT ? (
-						products.map((product, index) => (
-							<ProductCard key={index} product={product} images={currentCoversUrls(product.id)} needRefreshPage={needRefreshPage} setNeedRefreshPage={setNeedRefreshPage} />
-						))
+	return !loader ? (
+		<PrivateContent access={ACCESS.CATALOG}>
+			<CatalogContainer>
+				<div className="products-panel">
+					<Search
+						searchPhrase={searchPhrase}
+						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchPhrase(event.target.value)}
+						onClick={() => setShouldSearch(!shouldSearch)}
+						width="500px"
+					/>
+					<Button className="add-product-button" description="Добавить товар" onClick={() => navigate('/catalog/create-product')} />
+				</div>
+				<div className="products-container">
+					{products.length > 0 ? (
+						products.length === PAGINATION_LIMIT ? (
+							products.map((product, index) => (
+								<ProductCard key={index} product={product} images={currentCoversUrls(product.id)} needRefreshPage={needRefreshPage} setNeedRefreshPage={setNeedRefreshPage} />
+							))
+						) : (
+							fillFakeProduct().map((product) => product)
+						)
 					) : (
-						fillFakeProduct().map((product) => product)
-					)
-				) : (
-					<div className="no-products">Нет товаров</div>
-				)}
-			</div>
-			{lastPage > 1 && <Pagination page={page} setPage={setPage} lastPage={lastPage} />}
-		</CatalogContainer>
+						<div className="no-products">Нет товаров</div>
+					)}
+				</div>
+				{lastPage > 1 && <Pagination page={page} setPage={setPage} lastPage={lastPage} />}
+			</CatalogContainer>
+		</PrivateContent>
+	) : (
+		<Loader />
 	);
 };
 

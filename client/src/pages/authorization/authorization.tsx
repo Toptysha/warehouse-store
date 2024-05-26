@@ -5,15 +5,12 @@ import { useState } from 'react';
 import { AuthFormError, Button, Input, InputMask } from '../../components';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-// import { setUser } from '../../redux/actions';
-// import { selectUserRole } from '../../redux/selectors';
 import { ROLE } from '../../constants';
-// import { useResetForm } from '../../hooks';
-import styled from 'styled-components';
 import { useAppDispatch } from '../../redux/store';
 import { selectUser } from '../../redux/selectors';
 import { setUser } from '../../redux/reducers';
 import { request } from '../../utils';
+import styled from 'styled-components';
 
 const authFormScheme = yup.object().shape({
 	password: yup.string().required('Заполните пароль'),

@@ -19,7 +19,7 @@ const UserSlice = createSlice({
 			state.roleId = action.payload.roleId;
 			state.session = action.payload.session;
 		},
-		logout(state, action) {
+		logout(state) {
 			state.id = initialState.id;
 			state.login = initialState.login;
 			state.roleId = initialState.roleId;

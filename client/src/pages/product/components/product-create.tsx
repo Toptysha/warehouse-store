@@ -232,7 +232,7 @@ const ProductCreateContainer = styled.div`
 	justify-content: center;
 	flex-wrap: wrap;
 	width: 600px;
-	margin: 60px auto 0;
+	margin: 0 auto;
 	padding-top: 25px;
 	min-height: 900px;
 

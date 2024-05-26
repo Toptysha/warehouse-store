@@ -1,10 +1,8 @@
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-export const BlockContent = ({ srcCover, description }: { srcCover: string; description: string }) => {
-	const navigate = useNavigate();
+export const BlockContent = ({ srcCover, description, onClick }: { srcCover: string; description: string; onClick: () => void }) => {
 	return (
-		<BlockContentContainer onClick={() => navigate('/catalog')}>
+		<BlockContentContainer onClick={onClick}>
 			<img className="cover" src={srcCover} alt="cover" />
 			<div className="block-name">{description}</div>
 		</BlockContentContainer>

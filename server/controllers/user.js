@@ -83,7 +83,7 @@ function editUser(id, userData) {
 
 async function checkAuth(token) {
   if (!token) {
-    throw new Error("Token is empty");
+    throw new Error("User not found");
   }
 
   const tokenData = verifyToken(token);

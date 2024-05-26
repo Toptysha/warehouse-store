@@ -45,22 +45,59 @@ function photosDirectory(
   );
 }
 
-async function addPhotos({ photos, folder, typePhotos, currentSize }) {
-  console.log("TEST2", photos, folder, typePhotos, currentSize);
+// async function addPhotos({ photos, folder, typePhotos, currentSize }) {
+//   // console.log("TEST2", photos, folder, typePhotos, currentSize);
 
+//   try {
+//     // Создаем папку для сохранения файлов, если она не существует
+//     const uploadDir =
+//       typePhotos === PHOTOS_TYPE.TYPE_COVER
+//         ? photosDirectory(folder, PHOTOS_URLS.COVER_FOLDER)
+//         : photosDirectory(folder, PHOTOS_URLS.MEASUREMENTS_FOLDER, currentSize);
+//     if (!(await fs.access(uploadDir).catch(() => false))) {
+//       await fs.mkdir(uploadDir, { recursive: true });
+//     }
+
+//     // Сохраняем файлы в папку
+//     await Promise.all(
+//       photos.map(async (photo) => {
+//         const photoPath = path.join(uploadDir, photo.originalname);
+//         await fs.writeFile(photoPath, photo.buffer);
+//       })
+//     );
+
+//     console.log("Файлы успешно сохранены");
+//   } catch (error) {
+//     console.error("Ошибка при сохранении файлов:", error);
+//   }
+// }
+
+async function addPhotos({ photos, folder, typePhotos, currentSize }) {
   try {
-    // Создаем папку для сохранения файлов, если она не существует
     const uploadDir =
       typePhotos === PHOTOS_TYPE.TYPE_COVER
         ? photosDirectory(folder, PHOTOS_URLS.COVER_FOLDER)
         : photosDirectory(folder, PHOTOS_URLS.MEASUREMENTS_FOLDER, currentSize);
+
+    // Create the directory if it doesn't exist
     if (!(await fs.access(uploadDir).catch(() => false))) {
       await fs.mkdir(uploadDir, { recursive: true });
     }
 
-    // Сохраняем файлы в папку
+    // Read existing files in the directory
+    const existingFiles = await fs.readdir(uploadDir);
+    const maxFiles = typePhotos === PHOTOS_TYPE.TYPE_COVER ? 6 : 10;
+    const availableSlots = maxFiles - existingFiles.length;
+    const filesToAdd = Math.min(photos.length, availableSlots);
+
+    if (filesToAdd <= 0) {
+      console.log("Лимит файлов достигнут, новые файлы не добавлены.");
+      return;
+    }
+
+    // Add new files up to the available limit
     await Promise.all(
-      photos.map(async (photo) => {
+      photos.slice(0, filesToAdd).map(async (photo) => {
         const photoPath = path.join(uploadDir, photo.originalname);
         await fs.writeFile(photoPath, photo.buffer);
       })
@@ -68,7 +105,6 @@ async function addPhotos({ photos, folder, typePhotos, currentSize }) {
 
     console.log("Файлы успешно сохранены");
   } catch (error) {
-    console.log("TEST2", photos, folder, typePhotos, currentSize);
     console.error("Ошибка при сохранении файлов:", error);
   }
 }

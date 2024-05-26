@@ -8,42 +8,40 @@ const {
 const hasRole = require("../middlewares/hasRole");
 const authenticated = require("../middlewares/authenticated");
 const mapUser = require("../helpers/mapUser");
-const ROLES = require("../constants/roles");
+const ACCESS = require("../constants/access");
 
 const router = express.Router({ mergeParams: true });
 
-router.get("/", authenticated, hasRole([ROLES.ADMIN]), async (req, res) => {
-  const users = await getUsers();
-  res.send({ data: users.map(mapUser) });
+router.get("/", authenticated, hasRole(ACCESS.USERS), async (req, res) => {
+  try {
+    const users = await getUsers();
+    res.send({ data: users.map(mapUser) });
+  } catch (error) {
+    res.status(400).send({ error: error.message });
+  }
 });
 
-router.get(
-  "/roles",
-  authenticated,
-  hasRole([ROLES.ADMIN]),
-  async (req, res) => {
-    const roles = getRoles();
-    res.send({ data: roles });
-  }
-);
+router.get("/roles", authenticated, hasRole(ACCESS.USERS), async (req, res) => {
+  const roles = getRoles();
+  res.send({ data: roles });
+});
 
-router.patch(
-  "/:id",
-  authenticated,
-  hasRole([ROLES.ADMIN]),
-  async (req, res) => {
+router.patch("/:id", authenticated, hasRole(ACCESS.USERS), async (req, res) => {
+  try {
     const newUser = await editUser(req.params.id, {
       role: req.body.roleId,
     });
 
     res.send({ data: mapUser(newUser) });
+  } catch (error) {
+    res.status(400).send({ error: error.message });
   }
-);
+});
 
 router.delete(
   "/:id",
   authenticated,
-  hasRole([ROLES.ADMIN]),
+  hasRole(ACCESS.USERS),
   async (req, res) => {
     await deleteUser(req.params.id);
 

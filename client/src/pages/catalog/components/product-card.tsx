@@ -3,8 +3,11 @@ import { PhotoGallery } from './photo-gallery';
 import { Link, useNavigate } from 'react-router-dom';
 import { Product } from '../../../interfaces';
 import { Button } from '../../../components';
-import { deleteProduct } from '../../../utils';
 import { Dispatch, SetStateAction, useState } from 'react';
+import { useDeleteProduct } from '../../../hooks';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../../../redux/selectors';
+import { ACCESS } from '../../../constants';
 
 export const ProductCard = ({
 	product,
@@ -19,6 +22,10 @@ export const ProductCard = ({
 }) => {
 	const [disabledButtons, setDisabledButtons] = useState(false);
 	const navigate = useNavigate();
+	const deleteProductHandler = useDeleteProduct();
+
+	const userRole = useSelector(selectUser).roleId?.toString() as string;
+
 	return (
 		<ProductCardContainer>
 			<PhotoGallery images={images} path={`/catalog/${product.id}`} />
@@ -32,25 +39,28 @@ export const ProductCard = ({
 					<p>{`Размеры: ${product.sizes.join(', ')}`}</p>
 				</div>
 			</Link>
-			<div className="buttons">
-				<Button
-					description="Редактировать"
-					disabled={disabledButtons}
-					onClick={() => {
-						setDisabledButtons(true);
-						navigate(`/catalog/${product.id}/edit`);
-					}}
-				/>
-				<Button
-					description="Удалить"
-					disabled={disabledButtons}
-					onClick={() => {
-						setDisabledButtons(true);
-						deleteProduct(product.id);
-						setNeedRefreshPage(!needRefreshPage);
-					}}
-				/>
-			</div>
+			{ACCESS.DELETE_PRODUCTS.includes(userRole) && (
+				<div className="buttons">
+					<Button
+						description="Редактировать"
+						disabled={disabledButtons}
+						onClick={() => {
+							setDisabledButtons(true);
+							navigate(`/catalog/${product.id}/edit`);
+						}}
+					/>
+					<Button
+						description="Удалить"
+						disabled={disabledButtons}
+						onClick={() => {
+							deleteProductHandler(product.id, '/catalog', needRefreshPage, setNeedRefreshPage);
+							// setDisabledButtons(true);
+							// deleteProduct(product.id);
+							// setNeedRefreshPage(!needRefreshPage);
+						}}
+					/>
+				</div>
+			)}
 		</ProductCardContainer>
 	);
 };

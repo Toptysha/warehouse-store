@@ -3,9 +3,13 @@ import { changeProductInfo, noMeasurementsSizes, request, sortSizes, uploadPhoto
 import { useParams } from 'react-router-dom';
 import { PhotoType, Measurement, Product } from '../../../interfaces';
 import styled from 'styled-components';
-import { Button, FillAllPhotos, Input, UploadPhotos } from '../../../components';
-import { PHOTO_TYPES, PRODUCT, SIZES, mainProductInfo } from '../../../constants';
+import { Button, FillAllPhotos, Input, Loader, PrivateContent, UploadPhotos } from '../../../components';
+import { PHOTO_TYPES, PRODUCT, SIZES, ACCESS, mainProductInfo } from '../../../constants';
 import { useDeleteProduct } from '../../../hooks';
+import { useSelector } from 'react-redux';
+import { selectApp } from '../../../redux/selectors';
+import { useAppDispatch } from '../../../redux/store';
+import { closeLoader, setError } from '../../../redux/reducers';
 
 export const ProductEdit = () => {
 	const [product, setProduct] = useState<Product>(PRODUCT);
@@ -21,23 +25,28 @@ export const ProductEdit = () => {
 	const [selectedCoverFiles, setSelectedCoverFiles] = useState<File[]>([]);
 	const [selectedMeasurementsFiles, setSelectedMeasurementsFiles] = useState<File[]>([]);
 
-	const params = useParams();
+	const dispatch = useAppDispatch();
+
 	const deleteProductHandler = useDeleteProduct();
 
-	// console.log('measurementUrls', measurementUrls);
-	// console.log('noMeasurementSizes', noMeasurementSizes);
+	const loader = useSelector(selectApp).loader;
+
+	const params = useParams();
 
 	useEffect(() => {
-		request(`/products/${params.id}`).then(({ error, data }) => {
+		request(`/products/${params.id}`).then(({ error, errorPath, data }) => {
 			if (error) {
-				console.log(error);
+				dispatch(setError(errorPath === '_id' ? 'Продукт не найден' : error));
+				dispatch(closeLoader());
+			} else {
+				setProduct(data.product);
+				setCoverUrls(data.coversUrls);
+				setMeasurementUrls(data.measurementsUrls);
+				setNoMeasurementSizes(() => noMeasurementsSizes(data.product.sizes, data.measurementsUrls));
+				dispatch(closeLoader());
 			}
-			setProduct(data.product);
-			setCoverUrls(data.coversUrls);
-			setMeasurementUrls(data.measurementsUrls);
-			setNoMeasurementSizes(() => noMeasurementsSizes(data.product.sizes, data.measurementsUrls));
 		});
-	}, [params.id, isPageRefresh]);
+	}, [params.id, isPageRefresh, dispatch]);
 
 	useEffect(() => {
 		setSelectedSizes(product.sizes);
@@ -68,9 +77,15 @@ export const ProductEdit = () => {
 			if (error) {
 				console.log(error);
 			}
-			console.log(data);
+			// console.log(data);
 			setIsPageRefresh(!isPageRefresh);
 		});
+	};
+
+	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>, key: string, changeParam: string) => {
+		if (event.key === 'Enter') {
+			handleSaveInfo(key, changeParam);
+		}
 	};
 
 	const handleSavePhotos = async (typePhotos: PhotoType) => {
@@ -114,130 +129,137 @@ export const ProductEdit = () => {
 		return check;
 	};
 
-	return (
-		<ProductEditContainer>
-			<div className="main-info">
-				<div className="photos-container">
-					<UploadPhotos
-						selectedFiles={selectedCoverFiles}
-						setSelectedFiles={setSelectedCoverFiles}
-						typeOfSelectedFiles={PHOTO_TYPES.COVER as PhotoType}
-						description="Добавить обложки"
-						saveButtonDescription={`Отправить обложки на сервер`}
-						handleSavePhotos={() => handleSavePhotos(PHOTO_TYPES.COVER as PhotoType)}
-						width="190px"
-						$marginContainer="40px 0"
-					/>
-					<FillAllPhotos limit={6} photoUrls={coverUrls} isPageRefresh={isPageRefresh} setIsPageRefresh={setIsPageRefresh} />
-				</div>
-				<div className="product-card-info">
-					<div className="delete-product">
-						<Button
-							description={`Удалить товар`}
-							onClick={() => {
-								deleteProductHandler(params.id as string, '/catalog');
-							}}
+	return loader ? (
+		<Loader />
+	) : (
+		<PrivateContent access={ACCESS.EDIT_PRODUCTS}>
+			<ProductEditContainer>
+				<div className="main-info">
+					<div className="photos-container">
+						<UploadPhotos
+							selectedFiles={selectedCoverFiles}
+							setSelectedFiles={setSelectedCoverFiles}
+							typeOfSelectedFiles={PHOTO_TYPES.COVER as PhotoType}
+							description="Добавить обложки"
+							saveButtonDescription={`Отправить обложки на сервер`}
+							handleSavePhotos={() => handleSavePhotos(PHOTO_TYPES.COVER as PhotoType)}
+							width="190px"
+							$marginContainer="40px 0"
 						/>
+						<FillAllPhotos limit={6} photoUrls={coverUrls} isPageRefresh={isPageRefresh} setIsPageRefresh={setIsPageRefresh} />
 					</div>
-					<p>{`Артикул: ${product.article}`}</p>
-					{mainProductInfo(product).map(({ point }) => (
-						<div key={point[0]} className="info-point">
-							<p key={point[0]}>
-								{point[0]}:{' '}
-								{editingPoint === point[0] ? (
-									<Input
-										type="text"
-										value={currentPoint[point[0]]}
-										placeholder={`Введите ${point[0]}...`}
-										onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange(point[0], event.target.value)}
-									/>
-								) : (
-									<span>{point[1]}</span>
-								)}
-							</p>
-							<Button description="🖊️" onClick={() => handleEditClick(point[0], point[1])} />
+					<div className="product-card-info">
+						<div className="delete-product">
 							<Button
+								description={`Удалить товар`}
+								onClick={() => {
+									deleteProductHandler(params.id as string, '/catalog');
+								}}
+							/>
+						</div>
+						<p>{`Артикул: ${product.article}`}</p>
+						{mainProductInfo(product).map(({ point }) => (
+							<div key={point[0]} className="info-point">
+								<p key={point[0]}>
+									{point[0]}:{' '}
+									{editingPoint === point[0] ? (
+										<Input
+											type="text"
+											value={currentPoint[point[0]]}
+											placeholder={`Введите ${point[0]}...`}
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange(point[0], event.target.value)}
+											onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => handleKeyDown(event, point[0], point[2])}
+											onBlur={() => handleSaveInfo(point[0], point[2])}
+										/>
+									) : (
+										<span>{point[1]}</span>
+									)}
+								</p>
+								<Button description="🖊️ред." onClick={() => handleEditClick(point[0], point[1])} />
+								{/* <Button description="🖊️" onClick={() => handleEditClick(point[0], point[1])} /> */}
+								{/* <Button
 								description="💾"
 								onClick={() => {
 									handleSaveInfo(point[0], point[2]);
 								}}
-							/>
+							/> */}
+							</div>
+						))}
+						<div className="size-range">
+							<p>{`Размеры: `}</p>
+							<Button description="Изменить размерный ряд" onClick={() => setShowSizes(!showSizes)} />
 						</div>
-					))}
-					<div className="size-range">
-						<p>{`Размеры: `}</p>
-						<Button description="Изменить размерный ряд" onClick={() => setShowSizes(!showSizes)} />
-					</div>
-					<div className="size-range-container" style={{ display: `${showSizes ? 'block' : 'none'}` }}>
-						<div className="sizes-change">
-							{SIZES.map((size, index) => (
-								<div key={index} className="checkbox-sizes">
-									<label>
-										<input type="checkbox" value={size} checked={selectedSizes.includes(size)} onChange={handleOptionChange} />
+						<div className="size-range-container" style={{ display: `${showSizes ? 'block' : 'none'}` }}>
+							<div className="sizes-change">
+								{SIZES.map((size, index) => (
+									<div key={index} className="checkbox-sizes">
+										<label>
+											<input type="checkbox" value={size} checked={selectedSizes.includes(size)} onChange={handleOptionChange} />
+											{size}
+										</label>
+									</div>
+								))}
+							</div>
+							<Button description="Сохранить размерный ряд" onClick={() => handleSaveInfo('Размеры', 'sizes')} />
+						</div>
+						{sortSizes(product.sizes).includes('Нет в наличии') ? (
+							<div className="not-available">Нет в наличии</div>
+						) : (
+							<div className="sizes">
+								{product.sizes.map((size) => (
+									<div
+										key={size}
+										className={coloredSizes(size) ? 'size-black' : 'size-red'}
+										onClick={() => {
+											onChangeCurrentSize(size);
+										}}
+									>
 										{size}
-									</label>
-								</div>
-							))}
-						</div>
-						<Button description="Сохранить размерный ряд" onClick={() => handleSaveInfo('Размеры', 'sizes')} />
-					</div>
-					{sortSizes(product.sizes).includes('Нет в наличии') ? (
-						<div className="not-available">Нет в наличии</div>
-					) : (
-						<div className="sizes">
-							{product.sizes.map((size) => (
-								<div
-									key={size}
-									className={coloredSizes(size) ? 'size-black' : 'size-red'}
-									onClick={() => {
-										onChangeCurrentSize(size);
-									}}
-								>
-									{size}
-								</div>
-							))}
-						</div>
-					)}
-					<div className="photos-container">
-						{currentSize && (
-							<UploadPhotos
-								selectedFiles={selectedMeasurementsFiles}
-								setSelectedFiles={setSelectedMeasurementsFiles}
-								typeOfSelectedFiles={PHOTO_TYPES.MEASUREMENTS as PhotoType}
-								description={`Добавить замеры ${currentSize}`}
-								saveButtonDescription={`Отправить замеры ${currentSize} на сервер`}
-								handleSavePhotos={() => handleSavePhotos(PHOTO_TYPES.MEASUREMENTS as PhotoType)}
-								width="245px"
-								$labelLeft="60px"
-								$marginContainer="40px 0"
-								$marginLabel="100px 75px"
-							/>
+									</div>
+								))}
+							</div>
 						)}
-						{measurementUrls.map((obj) => {
-							if (Object.keys(obj)[0] === currentSize) {
-								if (Object.values(obj).length > 0) {
-									return Object.values(obj).map((urls) =>
-										coloredSizes(currentSize) ? (
-											<div className="measurements-container" key={urls[0]}>
-												<h2>{`Замеры размера: ${currentSize}`}</h2>
-												<FillAllPhotos limit={10} photoUrls={urls} isPageRefresh={isPageRefresh} setIsPageRefresh={setIsPageRefresh} />
-											</div>
-										) : null,
-									);
+						<div className="photos-container">
+							{currentSize && (
+								<UploadPhotos
+									selectedFiles={selectedMeasurementsFiles}
+									setSelectedFiles={setSelectedMeasurementsFiles}
+									typeOfSelectedFiles={PHOTO_TYPES.MEASUREMENTS as PhotoType}
+									description={`Добавить замеры ${currentSize}`}
+									saveButtonDescription={`Отправить замеры ${currentSize} на сервер`}
+									handleSavePhotos={() => handleSavePhotos(PHOTO_TYPES.MEASUREMENTS as PhotoType)}
+									width="245px"
+									$labelLeft="60px"
+									$marginContainer="40px 0"
+									$marginLabel="100px 75px"
+								/>
+							)}
+							{measurementUrls.map((obj) => {
+								if (Object.keys(obj)[0] === currentSize) {
+									if (Object.values(obj).length > 0) {
+										return Object.values(obj).map((urls) =>
+											coloredSizes(currentSize) ? (
+												<div className="measurements-container" key={urls[0]}>
+													<h2>{`Замеры размера: ${currentSize}`}</h2>
+													<FillAllPhotos limit={10} photoUrls={urls} isPageRefresh={isPageRefresh} setIsPageRefresh={setIsPageRefresh} />
+												</div>
+											) : null,
+										);
+									}
 								}
-							}
-							return null;
-						})}
+								return null;
+							})}
+						</div>
 					</div>
 				</div>
-			</div>
-		</ProductEditContainer>
+			</ProductEditContainer>
+		</PrivateContent>
 	);
 };
 
 const ProductEditContainer = styled.div`
 	width: 1100px;
-	margin: 60px auto 0;
+	margin: 0 auto;
 	padding-top: 25px;
 	min-height: 2050px;
 
@@ -257,23 +279,6 @@ const ProductEditContainer = styled.div`
 	& .photos-container label {
 		font-size: 18px;
 	}
-
-	// & .send-photos-container {
-	// 	display: flex;
-	// 	flex-wrap: wrap;
-	// 	justify-content: center;
-	// }
-
-	// & .send-photos-container > button {
-	// 	width: 340px;
-	// 	margin-top: -20px;
-	// 	background: #ffffff;
-	// }
-
-	// & .send-photos-container > button:hover {
-	// 	background: #e2e2e2;
-	// 	transition: 0.3s;
-	// }
 
 	& .product-card-info {
 		width: 500px;
@@ -296,10 +301,6 @@ const ProductEditContainer = styled.div`
 
 	& .delete-product button:hover {
 		text-decoration: none;
-	}
-
-	& .product-card-info p {
-		// margin-bottom: 10px;
 	}
 
 	& .info-point {
@@ -327,8 +328,14 @@ const ProductEditContainer = styled.div`
 	& .info-point button {
 		// background: yellow;
 		background: none;
+		width: 80px;
 		border: none;
 		margin: 0 10px;
+		text-decoration: underline;
+	}
+
+	& .info-point button:hover {
+		text-decoration: none;
 	}
 
 	& .size-range {

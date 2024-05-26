@@ -13,10 +13,10 @@ export const uploadPhotos = async (id: string, typePhotos: PhotoType, selectedFi
 			formData.append('currentSize', currentSize as string);
 		}
 
-		console.log(id, typePhotos, selectedFiles, currentSize)
-		formData.forEach((value, key) => {
-			console.log(key, value);
-		});
+		// console.log(id, typePhotos, selectedFiles, currentSize)
+		// formData.forEach((value, key) => {
+		// 	console.log(key, value);
+		// });
 
 		return await fetch('/products/photos', {
 			method: 'POST',

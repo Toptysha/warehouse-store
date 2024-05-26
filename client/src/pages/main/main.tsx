@@ -1,30 +1,55 @@
 import { ROLE } from '../../constants';
 import { useSelector } from 'react-redux';
-import { selectUser } from '../../redux/selectors';
+import { selectApp, selectUser } from '../../redux/selectors';
 import { Registration } from '../registration/registration';
 import { useAppDispatch } from '../../redux/store';
-import { setHeaderNameMenuDisplay } from '../../redux/reducers';
+import { closeLoader, openLoader } from '../../redux/reducers';
 import cover1 from '../../images/cover1.jpg';
 import cover2 from '../../images/cover2.jpg';
 import cover3 from '../../images/cover3.jpg';
 import cover4 from '../../images/cover4.jpg';
 import styled from 'styled-components';
 import { BlockContent } from './components';
+import { useEffect, useState } from 'react';
+import { Loader } from '../../components';
+import { useNavigate } from 'react-router-dom';
 
 export const Main = () => {
+	const [content, setContent] = useState<JSX.Element>(<Loader />);
+
 	const dispatch = useAppDispatch();
 	const user = useSelector(selectUser);
+	const loader = useSelector(selectApp).loader;
 
-	return user.roleId !== ROLE.GUEST ? (
-		<MainContainer onClick={() => dispatch(setHeaderNameMenuDisplay(false))}>
-			<BlockContent srcCover={cover1} description="Каталог товаров" />
-			<BlockContent srcCover={cover2} description="Оформить заказ" />
-			<BlockContent srcCover={cover3} description="Возврат/обмен" />
-			<BlockContent srcCover={cover4} description="Продажи" />
-		</MainContainer>
-	) : (
-		<Registration />
-	);
+	const navigate = useNavigate();
+
+	const catalogClick = () => {
+		navigate('/catalog');
+		dispatch(openLoader());
+	};
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			const newContent =
+				user.roleId !== ROLE.GUEST ? (
+					<MainContainer>
+						<BlockContent srcCover={cover1} description="Каталог товаров" onClick={catalogClick} />
+						<BlockContent srcCover={cover2} description="Оформить заказ" onClick={catalogClick} />
+						<BlockContent srcCover={cover3} description="Возврат/обмен" onClick={catalogClick} />
+						<BlockContent srcCover={cover4} description="Продажи" onClick={catalogClick} />
+					</MainContainer>
+				) : (
+					<Registration />
+				);
+			setContent(newContent);
+			dispatch(closeLoader());
+		}, 500);
+
+		return () => clearTimeout(timer); // Очистка таймера при размонтировании компонента
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [dispatch, user.roleId]);
+
+	return loader ? <Loader /> : content;
 };
 
 const MainContainer = styled.div`

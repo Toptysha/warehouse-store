@@ -10,3 +10,6 @@ export * from './search/search';
 export * from './fill-all-photos/fill-all-photos';
 export * from './upload-photos/upload-photos';
 export * from './modal/modal';
+export * from './location/location';
+export * from './loader/loader';
+export * from './private-content/private-content';

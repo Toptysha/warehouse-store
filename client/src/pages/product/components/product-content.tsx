@@ -4,6 +4,12 @@ import { noMeasurementsSizes, request } from '../../../utils';
 import { useParams } from 'react-router-dom';
 import { Measurement, Product } from '../../../interfaces';
 import styled from 'styled-components';
+import { Loader, PrivateContent } from '../../../components';
+import { useSelector } from 'react-redux';
+import { selectApp } from '../../../redux/selectors';
+import { useAppDispatch } from '../../../redux/store';
+import { closeLoader, setError } from '../../../redux/reducers';
+import { ACCESS } from '../../../constants';
 
 export const ProductContent = () => {
 	const params = useParams();
@@ -13,72 +19,79 @@ export const ProductContent = () => {
 	const [noMeasurementSizes, setNoMeasurementSizes] = useState<string[]>([]);
 	const [currentSize, setCurrentSize] = useState<string>('');
 
-	// const testSizes = ['42', '44', '46', '48-min', '48-max', '50', '52', '54'];
-	// const testSizes2: Measurement[] = [{ S: ['SS1', 'SS1', 'SS1'] }, { M: ['MM1', 'MM1', 'MM1'] }, { L: ['LL1', 'LL1', 'LL1'] }];
+	const dispatch = useAppDispatch();
+
+	const loader = useSelector(selectApp).loader;
 
 	useEffect(() => {
-		request(`/products/${params.id}`).then(({ error, data }) => {
+		request(`/products/${params.id}`).then(({ error, errorPath, data }) => {
 			if (error) {
-				console.log(error);
+				dispatch(setError(errorPath === '_id' ? 'Продукт не найден' : error));
+				dispatch(closeLoader());
+			} else {
+				setProduct(data.product);
+				setCovers(data.coversUrls);
+				setMeasurementUrls(data.measurementsUrls);
+				setNoMeasurementSizes(() => noMeasurementsSizes(data.product.sizes, data.measurementsUrls));
+				dispatch(closeLoader());
 			}
-			// console.log(data);
-			setProduct(data.product);
-			setCovers(data.coversUrls);
-			setMeasurementUrls(data.measurementsUrls);
-			setNoMeasurementSizes(() => noMeasurementsSizes(data.product.sizes, data.measurementsUrls));
 		});
-	}, [params.id]);
+	}, [params.id, dispatch]);
 
-	return (
-		<ProductContentContainer>
-			{/* <PhotoGallery images={measurementUrls} /> */}
-			<div className="main-info">
-				<div className="cover">{covers !== undefined ? <img src={covers[0]} alt="Cover" /> : <img src={noImage} alt="NO COVER" />}</div>
-				<div className="product-card-info">
-					<p>{`Артикул: ${product.article}`}</p>
-					<p>{`Бренд: ${product.brand}`}</p>
-					<p>{`Наименование: ${product.name}`}</p>
-					<p>{`Цвет: ${product.color}`}</p>
-					<p>{`Цена: ${product.price}`}</p>
-					<p>{`Размеры: `}</p>
-					{product.sizes.includes('Нет в наличии') ? (
-						<div className="not-available">Нет в наличии</div>
-					) : (
-						<div className="sizes">
-							{product.sizes.map((size) => (
-								<div key={size} className={noMeasurementSizes.includes(size) ? 'size-red' : 'size-black'} onClick={() => setCurrentSize(size)}>
-									{size}
-								</div>
-							))}
-						</div>
-					)}
-					{}
+	return loader ? (
+		<Loader />
+	) : (
+		<PrivateContent access={ACCESS.WATCH_PRODUCTS}>
+			<ProductContentContainer>
+				{/* <PhotoGallery images={measurementUrls} /> */}
+				<div className="main-info">
+					<div className="cover">{covers !== undefined ? <img src={covers[0]} alt="Cover" /> : <img src={noImage} alt="NO COVER" />}</div>
+					<div className="product-card-info">
+						<p>{`Артикул: ${product.article}`}</p>
+						<p>{`Бренд: ${product.brand}`}</p>
+						<p>{`Наименование: ${product.name}`}</p>
+						<p>{`Цвет: ${product.color}`}</p>
+						<p>{`Цена: ${product.price}`}</p>
+						<p>{`Размеры: `}</p>
+						{product.sizes.includes('Нет в наличии') ? (
+							<div className="not-available">Нет в наличии</div>
+						) : (
+							<div className="sizes">
+								{product.sizes.map((size) => (
+									<div key={size} className={noMeasurementSizes.includes(size) ? 'size-red' : 'size-black'} onClick={() => setCurrentSize(size)}>
+										{size}
+									</div>
+								))}
+							</div>
+						)}
+						{}
+					</div>
 				</div>
-			</div>
-			<div className="measurements">
-				{measurementUrls.map((obj) => {
-					if (Object.keys(obj)[0] === currentSize) {
-						if (Object.values(obj).length > 0) {
-							return Object.values(obj).map((urls) => (
-								<div className="measurements-photos" key={urls[0]}>
-									<h2>{`Замеры размера: ${currentSize}`}</h2>
-									{urls.map((url) => {
-										return <img src={url} alt="Measurement" key={url} />;
-									})}
-								</div>
-							));
+				<div className="measurements">
+					{measurementUrls.map((obj) => {
+						if (Object.keys(obj)[0] === currentSize) {
+							if (Object.values(obj).length > 0) {
+								return Object.values(obj).map((urls) => (
+									<div className="measurements-photos" key={urls[0]}>
+										<h2>{`Замеры размера: ${currentSize}`}</h2>
+										{urls.map((url) => {
+											return <img src={url} alt="Measurement" key={url} />;
+										})}
+									</div>
+								));
+							}
 						}
-					}
-					return null;
-				})}
-			</div>
-		</ProductContentContainer>
+						return null;
+					})}
+				</div>
+			</ProductContentContainer>
+		</PrivateContent>
 	);
 };
 
 const ProductContentContainer = styled.div`
 	width: 1100px;
-	margin: 60px auto 0;
+	margin: 0 auto;
 	padding-top: 25px;
 	min-height: 900px;
 

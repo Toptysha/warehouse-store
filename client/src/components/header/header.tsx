@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
-import { selectApp, selectUser } from '../../redux/selectors';
+import { selectUser } from '../../redux/selectors';
 import { useAppDispatch } from '../../redux/store';
-import { logout, setHeaderNameMenuDisplay } from '../../redux/reducers';
+import { logout, openLoader } from '../../redux/reducers';
 import { useNavigate } from 'react-router-dom';
 import { COLORS, ROLE } from '../../constants';
 import hangerLogo from '../../images/hanger-logo.png';
@@ -10,20 +10,42 @@ import arrowsDown from '../../images/arrows.png';
 import styled from 'styled-components';
 import { NameMenuPoint } from './components';
 import { request } from '../../utils';
+import { useEffect, useRef, useState } from 'react';
 
 export const Header = () => {
+	const [isVisible, setIsVisible] = useState(false);
+	const divRef = useRef<HTMLDivElement>(null);
+
+	const handleClickOutside = (event: MouseEvent) => {
+		if (divRef.current && !divRef.current.contains(event.target as Node)) {
+			setIsVisible(false);
+		}
+	};
+
+	useEffect(() => {
+		document.addEventListener('click', handleClickOutside, true);
+		return () => {
+			document.removeEventListener('click', handleClickOutside, true);
+		};
+	}, []);
+
 	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
 
 	const user = useSelector(selectUser);
-	const appStore = useSelector(selectApp);
 
 	const onLogout = () => {
+		navigate('/login');
 		request('/logout', 'POST').then(() => {
-			dispatch(logout(''));
-			dispatch(setHeaderNameMenuDisplay(false));
-			navigate('/login');
+			dispatch(logout());
+			setIsVisible(false);
 		});
+	};
+
+	const onUsers = () => {
+		dispatch(openLoader());
+		setIsVisible(false);
+		navigate('/users');
 	};
 
 	return user.roleId !== ROLE.GUEST ? (
@@ -34,16 +56,18 @@ export const Header = () => {
 					<img className="beauty-logo" src={beautyLogo} alt="beautyLogo" />
 				</div>
 				<div className="name-block-wrapper">
-					<div className="name-block" onClick={() => dispatch(setHeaderNameMenuDisplay(!appStore.headerNameMenuDisplay))}>
+					<div className="name-block" onClick={() => setIsVisible(true)}>
 						<h2>{user.login}</h2>
 						<img className="arrows-down" src={arrowsDown} alt="arrows" />
 					</div>
-					<div className="name-menu" style={{ display: `${appStore.headerNameMenuDisplay ? 'block' : 'none'}` }}>
-						<NameMenuPoint onClick={() => {}} description="Управление аккаунтом" />
-						<NameMenuPoint onClick={() => {}} description="Управление пользователями" />
-						<NameMenuPoint onClick={() => {}} description="Логи" />
-						<NameMenuPoint onClick={onLogout} description="Выйти" />
-					</div>
+					{isVisible && (
+						<div className="name-menu" ref={divRef}>
+							<NameMenuPoint onClick={() => {}} description="Управление аккаунтом" />
+							<NameMenuPoint onClick={onUsers} description="Управление пользователями" />
+							<NameMenuPoint onClick={() => {}} description="Логи" />
+							<NameMenuPoint onClick={onLogout} description="Выйти" />
+						</div>
+					)}
 				</div>
 			</div>
 		</HeaderContainer>

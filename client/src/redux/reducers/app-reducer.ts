@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 
 const initialState = {
-	headerNameMenuDisplay: false,
+	loader: true,
 	modal: {
 		isOpen: false,
 		text: '',
@@ -15,8 +15,11 @@ const AppSlice = createSlice({
     name: 'app',
     initialState,
     reducers: {
-        setHeaderNameMenuDisplay(state, action) {
-			state.headerNameMenuDisplay =  action.payload;
+		openLoader(state) {
+			state.loader = true;
+		},
+		closeLoader(state) {
+			state.loader = false;
 		},
 		openModal(state, action) {
 			state.modal = {
@@ -40,6 +43,6 @@ const AppSlice = createSlice({
     }
 })
 
-export const {setHeaderNameMenuDisplay, openModal, closeModal} = AppSlice.actions
+export const { openLoader, closeLoader, openModal, closeModal} = AppSlice.actions
 
 export default AppSlice.reducer

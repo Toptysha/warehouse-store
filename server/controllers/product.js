@@ -50,9 +50,28 @@ async function deleteProduct(id) {
 }
 
 async function editProduct(id, product) {
-  const updatedProduct = await Product.findByIdAndUpdate(id, product, {
-    returnDocument: "after",
-  });
+  let refactorPrice = "";
+  if (
+    !Number(product.price) ||
+    product.price.includes(".") ||
+    product.price.includes(",")
+  ) {
+    arrOfPrice = product.price.split("");
+    arrOfPrice.forEach((element) => {
+      if (Number(element) || element === "0") {
+        refactorPrice += element;
+      }
+    });
+  }
+
+  console.log("TEST2", refactorPrice);
+  const updatedProduct = await Product.findByIdAndUpdate(
+    id,
+    { ...product, price: refactorPrice === "" ? product.price : refactorPrice },
+    {
+      returnDocument: "after",
+    }
+  );
 
   return updatedProduct;
 }
