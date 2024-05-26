@@ -50,28 +50,43 @@ async function deleteProduct(id) {
 }
 
 async function editProduct(id, product) {
-  let refactorPrice = "";
-  if (
-    !Number(product.price) ||
-    product.price.includes(".") ||
-    product.price.includes(",")
-  ) {
-    arrOfPrice = product.price.split("");
-    arrOfPrice.forEach((element) => {
-      if (Number(element) || element === "0") {
-        refactorPrice += element;
-      }
-    });
-  }
+  let updatedProduct;
 
-  console.log("TEST2", refactorPrice);
-  const updatedProduct = await Product.findByIdAndUpdate(
-    id,
-    { ...product, price: refactorPrice === "" ? product.price : refactorPrice },
-    {
-      returnDocument: "after",
+  if (product.price) {
+    let refactorPrice = "";
+    if (
+      !Number(product.price) ||
+      product.price.includes(".") ||
+      product.price.includes(",")
+    ) {
+      arrOfPrice = product.price.split("");
+      arrOfPrice.forEach((element) => {
+        if (Number(element) || element === "0") {
+          refactorPrice += element;
+        }
+      });
     }
-  );
+
+    // console.log("TEST2", refactorPrice);
+    updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      {
+        ...product,
+        price: refactorPrice === "" ? product.price : refactorPrice,
+      },
+      {
+        returnDocument: "after",
+      }
+    );
+  } else {
+    updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      { ...product },
+      {
+        returnDocument: "after",
+      }
+    );
+  }
 
   return updatedProduct;
 }
