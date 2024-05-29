@@ -5,6 +5,7 @@ const {
   getProduct,
   deleteProduct,
   editProduct,
+  getProductByArticle,
 } = require("../controllers/product");
 const {
   addPhotos,
@@ -37,6 +38,7 @@ router.post(
         color: req.body.color,
         price: req.body.price,
         sizes: req.body.sizes,
+        author: req.user._id,
       });
 
       res.send({ data: newProduct });
@@ -80,6 +82,27 @@ router.get(
       res.send({
         error: null,
         data: { product: mapProduct(product), coversUrls, measurementsUrls },
+      });
+    } catch (err) {
+      res.send({ error: err.message || "Unknown Error", errorPath: err.path });
+    }
+  }
+);
+
+router.post(
+  "/article",
+  authenticated,
+  hasRole(ACCESS.WATCH_PRODUCTS),
+  async (req, res) => {
+    try {
+      const products = await getProductByArticle(req.body.partOfArticle);
+      const coversUrls = await getCovers(products);
+      res.send({
+        error: null,
+        data: {
+          products: products.map(mapProduct),
+          coversUrls,
+        },
       });
     } catch (err) {
       res.send({ error: err.message || "Unknown Error", errorPath: err.path });

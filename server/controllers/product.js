@@ -41,6 +41,14 @@ function getProduct(id) {
   return Product.findById(id);
 }
 
+function getProductByArticle(partOfArticle) {
+  const product = Product.find({
+    article: { $regex: partOfArticle, $options: "i" },
+  });
+
+  return product;
+}
+
 async function deleteProduct(id) {
   const folderPath = photosDirectory(id);
 
@@ -67,7 +75,6 @@ async function editProduct(id, product) {
       });
     }
 
-    // console.log("TEST2", refactorPrice);
     updatedProduct = await Product.findByIdAndUpdate(
       id,
       {
@@ -95,6 +102,7 @@ module.exports = {
   addProduct,
   getProducts,
   getProduct,
+  getProductByArticle,
   deleteProduct,
   editProduct,
 };

@@ -40,6 +40,10 @@ async function login(phone, password) {
   };
 }
 
+function getUser(id) {
+  return User.findById(id);
+}
+
 function getUsers() {
   return User.find();
 }
@@ -95,6 +99,7 @@ async function checkAuth(token) {
 module.exports = {
   register,
   login,
+  getUser,
   getUsers,
   getRoles,
   deleteUser,

@@ -164,7 +164,7 @@ export const ProductEdit = () => {
 									{point[0]}:{' '}
 									{editingPoint === point[0] ? (
 										<Input
-											type="text"
+											type={point[0] === 'Цена' ? 'number' : 'text'}
 											value={currentPoint[point[0]]}
 											placeholder={`Введите ${point[0]}...`}
 											onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange(point[0], event.target.value)}

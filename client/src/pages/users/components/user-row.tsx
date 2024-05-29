@@ -12,16 +12,6 @@ export const UserRow = ({ id, login, phone, registeredAt, roleId }: { id: string
 
 	const currentUser = useSelector(selectUser);
 
-	// const roleName = (role: string) => {
-	// 	let roleName = '';
-	// 	Object.entries(ROLES_FOR_CLIENT).forEach((point) => {
-	// 		if (role.toString() === point[1].toString()) {
-	// 			roleName = point[0];
-	// 		}
-	// 	});
-	// 	return roleName;
-	// };
-
 	const onSaveRole = () => {
 		request(`/users/${id}`, 'PATCH', { roleId: selectedRoleId }).then(({ error }) => {
 			if (error) {

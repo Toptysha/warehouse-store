@@ -1,5 +1,6 @@
 const express = require("express");
 const {
+  getUser,
   getUsers,
   getRoles,
   editUser,
@@ -20,6 +21,20 @@ router.get("/", authenticated, hasRole(ACCESS.USERS), async (req, res) => {
     res.status(400).send({ error: error.message });
   }
 });
+
+router.get(
+  "/:id",
+  authenticated,
+  hasRole(ACCESS.WATCH_PRODUCTS),
+  async (req, res) => {
+    try {
+      const user = await getUser(req.params.id);
+      res.send({ data: mapUser(user) });
+    } catch (err) {
+      res.send({ error: err.message || "Unknown Error", errorPath: err.path });
+    }
+  }
+);
 
 router.get("/roles", authenticated, hasRole(ACCESS.USERS), async (req, res) => {
   const roles = getRoles();

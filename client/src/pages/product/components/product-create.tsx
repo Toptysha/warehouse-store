@@ -185,7 +185,7 @@ export const ProductCreate = () => {
 				<h3>Цвет:</h3>
 				<Input placeholder="Цвет" width="300px" {...register('color', { onChange: () => setServerError('') })} />
 				<h3>Цена:</h3>
-				<Input placeholder="Цена" width="300px" {...register('price', { onChange: () => setServerError('') })} />
+				<Input type="number" placeholder="Цена" width="300px" {...register('price', { onChange: () => setServerError('') })} />
 				<h3>Выберите Размеры:</h3>
 				<p>(если не указать размеры, будет считаться, что товар отсутствует)</p>
 				<div className="sizes">

@@ -3,10 +3,10 @@ import { useSelector } from 'react-redux';
 import { selectApp, selectUser } from '../../redux/selectors';
 import { Registration } from '../registration/registration';
 import { useAppDispatch } from '../../redux/store';
-import { closeLoader, openLoader } from '../../redux/reducers';
+import { closeLoader } from '../../redux/reducers';
 import cover1 from '../../images/cover1.jpg';
 import cover2 from '../../images/cover2.jpg';
-import cover3 from '../../images/cover3.jpg';
+// import cover3 from '../../images/cover3.jpg';
 import cover4 from '../../images/cover4.jpg';
 import styled from 'styled-components';
 import { BlockContent } from './components';
@@ -23,9 +23,8 @@ export const Main = () => {
 
 	const navigate = useNavigate();
 
-	const catalogClick = () => {
-		navigate('/catalog');
-		dispatch(openLoader());
+	const onClick = (path: string) => {
+		navigate(path);
 	};
 
 	useEffect(() => {
@@ -33,10 +32,10 @@ export const Main = () => {
 			const newContent =
 				user.roleId !== ROLE.GUEST ? (
 					<MainContainer>
-						<BlockContent srcCover={cover1} description="Каталог товаров" onClick={catalogClick} />
-						<BlockContent srcCover={cover2} description="Оформить заказ" onClick={catalogClick} />
-						<BlockContent srcCover={cover3} description="Возврат/обмен" onClick={catalogClick} />
-						<BlockContent srcCover={cover4} description="Продажи" onClick={catalogClick} />
+						<BlockContent srcCover={cover1} description="Каталог товаров" onClick={() => onClick('/catalog')} />
+						<BlockContent srcCover={cover2} description="Оформить заказ" onClick={() => onClick('/order')} />
+						{/* <BlockContent srcCover={cover3} description="Возврат/обмен" onClick={() => onClick('/catalog')} /> */}
+						<BlockContent srcCover={cover4} description="Продажи" onClick={() => onClick('/sales')} />
 					</MainContainer>
 				) : (
 					<Registration />

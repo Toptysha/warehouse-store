@@ -1,5 +1,5 @@
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { Authorization, Catalog, Main, Product, Users } from './pages';
+import { Authorization, Catalog, Main, Product, Sales, Users } from './pages';
 import { Header, Footer, Modal, Location, Error } from './components';
 import { useAppDispatch } from './redux/store';
 import { useEffect, useLayoutEffect } from 'react';
@@ -8,6 +8,7 @@ import { request } from './utils';
 // import { useSelector } from 'react-redux';
 // import { selectApp } from './redux/selectors';
 import { ERROR } from './constants';
+import { MakeOrder } from './pages/make-order/make-order';
 
 export default function App() {
 	const dispatch = useAppDispatch();
@@ -43,6 +44,8 @@ export default function App() {
 				<Route path="/catalog/:id" element={<Product />} />
 				<Route path="/catalog/:id/edit" element={<Product />} />
 				<Route path="/catalog/create-product" element={<Product />} />
+				<Route path="/order" element={<MakeOrder />} />
+				<Route path="/sales" element={<Sales />} />
 				<Route path="/users" element={<Users />} />
 				<Route path="*" element={<Error error={ERROR.PAGE_NOT_EXIST} />} />
 			</Routes>
