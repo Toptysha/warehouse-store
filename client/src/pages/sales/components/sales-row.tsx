@@ -1,22 +1,37 @@
 import styled from 'styled-components';
 import { Sale } from '../../../interfaces';
+import { formatDateFromDb, trimmingText } from '../../../utils';
+import { Link, useNavigate } from 'react-router-dom';
 
 export const SalesRow = ({ sale }: { sale: Sale }) => {
-	// const currentUser = useSelector(selectUser);
+	const navigate = useNavigate();
+
+	const handleRowClick = (e: React.MouseEvent) => {
+		if (!(e.target as HTMLElement).closest('a')) {
+			navigate(`/sales/${sale.id}`);
+		}
+	};
+
+	const isOfflineDeal = sale.address === 'offline' && sale.name === 'offline';
 
 	return (
-		<SalesRowContainer>
-			<div className="infoPoint">{sale.name}</div>
-			<div className="infoPoint">{sale.phone}</div>
-			<div className="infoPoint">{sale.address.length > 12 ? sale.address.slice(0, 10) + '...' : sale.address}</div>
-			<div className="infoPoint">{sale.delivery}</div>
-			<div className="infoPoint">{sale.product.productId}</div>
-			<div className="infoPoint">{sale.authorId}</div>
+		<SalesRowContainer onClick={handleRowClick}>
+			<div className="infoPoint">{isOfflineDeal ? 'Магазин' : `` + sale.name}</div>
+			<div className="infoPoint">{isOfflineDeal ? 'Магазин' : ` ` + sale.phone}</div>
+			<div className="infoPoint">{isOfflineDeal ? 'Магазин' : `  ` + trimmingText(sale.address, 10)}</div>
+			<div className="infoPoint">{isOfflineDeal ? 'Магазин' : `    ` + sale.deliveryType}</div>
+			<div className="infoPoint">
+				<Link to={`/catalog/${sale.product.productId}`}>{`   ` + sale.product.productArticle}</Link>
+			</div>
+			<div className="infoPoint">{`     ` + sale.product.price}</div>
+			<div className="infoPoint">{`     ` + formatDateFromDb(sale.createdAt)}</div>
+			<div className="infoPoint">{`      ` + sale.authorId}</div>
 		</SalesRowContainer>
 	);
 };
 
 const SalesRowContainer = styled.div`
+	cursor: pointer;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -27,7 +42,7 @@ const SalesRowContainer = styled.div`
 	margin-bottom: 10px;
 	padding: 0 20px;
 	box-sizing: border-box;
-	font-size: 18px;
+	font-size: 14px;
 	font-weight: 400;
 
 	& .infoPoint {
@@ -38,7 +53,16 @@ const SalesRowContainer = styled.div`
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		// border: 1px solid black;
+	}
+
+	& .infoPoint a {
+		text-decoration: none;
+		color: #000;
+	}
+
+	& .infoPoint a:hover {
+		color: red;
+		transition: 0.3s;
 	}
 
 	& select {

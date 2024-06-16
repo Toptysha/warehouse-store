@@ -31,12 +31,24 @@ export const ProductCard = ({
 			<PhotoGallery images={images} path={`/catalog/${product.id}`} />
 			<Link to={`/catalog/${product.id}`}>
 				<div className="product-card-info">
-					<p>{`Артикул: ${product.article}`}</p>
-					<p>{`Бренд: ${product.brand}`}</p>
-					<p>{`Наименование: ${product.name}`}</p>
-					<p>{`Цвет: ${product.color}`}</p>
-					<p>{`Цена: ${product.price}`}</p>
-					<p>{`Размеры: ${product.sizes.join(', ')}`}</p>
+					<p>
+						Артикул: <span>{product.article}</span>
+					</p>
+					<p>
+						Бренд: <span>{product.brand}</span>
+					</p>
+					<p>
+						Наименование: <span>{product.name}</span>
+					</p>
+					<p>
+						Цвет: <span>{product.color}</span>
+					</p>
+					<p>
+						Цена: <span>{product.price}</span>
+					</p>
+					<p>
+						Размеры: <span>{product.sizes.join(', ')}</span>
+					</p>
 				</div>
 			</Link>
 			{ACCESS.DELETE_PRODUCTS.includes(userRole) && (
@@ -54,9 +66,6 @@ export const ProductCard = ({
 						disabled={disabledButtons}
 						onClick={() => {
 							deleteProductHandler(product.id, '/catalog', needRefreshPage, setNeedRefreshPage);
-							// setDisabledButtons(true);
-							// deleteProduct(product.id);
-							// setNeedRefreshPage(!needRefreshPage);
 						}}
 					/>
 				</div>
@@ -80,6 +89,18 @@ const ProductCardContainer = styled.div`
 		margin: 5px;
 	}
 
+	& .product-card-info p {
+		width: 100%;
+		font-size: 15px;
+		font-weight: 400;
+		margin: 0px 0 0 10px;
+	}
+
+	& .product-card-info span {
+		font-size: 16px;
+		font-weight: 500;
+	}
+
 	& .buttons {
 		display: flex;
 		justify-content: space-between;
@@ -95,7 +116,6 @@ const ProductCardContainer = styled.div`
 	}
 
 	& .buttons button:hover {
-		// background-color: #dbdbdb;
 		text-decoration: none;
 	}
 `;

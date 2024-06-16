@@ -5,6 +5,5 @@ export function deleteProduct(id: string) {
 		if (error) {
 			console.log(error);
 		}
-		console.log(data);
 	});
 }

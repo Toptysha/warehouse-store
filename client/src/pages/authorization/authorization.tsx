@@ -18,6 +18,8 @@ const authFormScheme = yup.object().shape({
 
 export const Authorization = () => {
 	const [phone, setPhone] = useState('');
+	const [viewError, setViewError] = useState<boolean>(false);
+
 	const {
 		register,
 		handleSubmit,
@@ -38,6 +40,12 @@ export const Authorization = () => {
 	const user = useSelector(selectUser);
 
 	const onSubmit = ({ password }: { password: string }) => {
+		if (!phone) {
+			setViewError(true);
+			setTimeout(() => setViewError(false), 2500);
+			return;
+		}
+
 		const phoneFormat = phone.replaceAll(' ', '').replaceAll('-', '').replaceAll('(', '').replaceAll(')', '');
 		request('/login', 'POST', { phone: phoneFormat, password }).then(({ error, data }) => {
 			if (error) {
@@ -49,8 +57,13 @@ export const Authorization = () => {
 		});
 	};
 
-	const formError = errors?.password?.message;
-	const errorMessage = formError || serverError;
+	let allErrors = {
+		serverError,
+		formError: errors?.password?.message,
+		phoneError: !phone && viewError ? 'Введите номер телефона' : '',
+	};
+
+	const error = allErrors.serverError || allErrors.phoneError || allErrors.formError;
 
 	if (user.roleId !== ROLE.GUEST) {
 		return <Navigate to="/" />;
@@ -68,9 +81,9 @@ export const Authorization = () => {
 					}}
 				/>
 				<Input type="password" placeholder="Пароль..." width="300px" {...register('password', { onChange: () => setServerError('') })} />
-				<Button className="login-button" description="Войти" type="submit" disabled={!!formError} />
+				<Button className="login-button" description="Войти" type="submit" disabled={!!error} />
 
-				{errorMessage && <AuthFormError>{errorMessage}</AuthFormError>}
+				{error ? <AuthFormError>{error}</AuthFormError> : null}
 			</form>
 			<Button description="Зарегистрироваться" onClick={() => navigate('/')} />
 		</AuthorizationContainer>

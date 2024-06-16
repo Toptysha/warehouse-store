@@ -87,7 +87,6 @@ export const SendPhotosContainer = styled.div<{ $background: string; width?: str
 	flex-wrap: wrap;
 	justify-content: center;
 	width: 100%;
-	// height: 20px;
 
 	& > button {
 		width: 340px;

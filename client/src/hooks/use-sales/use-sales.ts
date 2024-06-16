@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { closeLoader } from '../../redux/reducers';
 import { request } from '../../utils';
-import { Sale, Order} from '../../interfaces';
+import { Order, Sale } from '../../interfaces';
 import { PAGINATION_LIMIT } from '../../constants';
 import { useAppDispatch } from '../../redux/store';
 
@@ -30,19 +30,17 @@ export const useSales = (searchPhrase: string, page: number) => {
                     console.error(error);
                     dispatch(closeLoader());
                 } else {
-                    console.log(data);
                     setOrders(data.orders);
 					setLastPage(data.lastPage);
                     const formedSales: Sale[] = [];
 
                     data.orders.forEach((order) => {
-                        order.products.forEach((product) => {
-                            const { products, ...rest } = order;
-                            formedSales.push({ ...rest, product });
+                        order.product.forEach((prod) => {
+                            const { product, ...rest } = order;
+                            formedSales.push({ ...rest, product: prod });
                         });
                     });
 
-                    console.log('TEST2', formedSales);
                     setSales(formedSales);
 
                     const salesWithAuthorNames = await Promise.all(
@@ -70,8 +68,7 @@ export const useSales = (searchPhrase: string, page: number) => {
                                     console.error(productResponse.error);
                                     return sale;
                                 } else {
-									// productId: data.product.article
-                                    return { ...sale, product: { ...sale.product, productId: productResponse.data.product.article } };
+                                    return { ...sale, product: { ...sale.product, productArticle: productResponse.data.product.article } };
                                 }
                             } catch (error) {
                                 console.error(error);
@@ -79,13 +76,10 @@ export const useSales = (searchPhrase: string, page: number) => {
                             }
                         })
                     );
-
-                    console.log('TEST4', salesWithProductArticles);
                     setSales(salesWithProductArticles);
                 }
             } catch (error) {
                 console.error(error);
-                dispatch(closeLoader());
             } finally {
                 dispatch(closeLoader());
             }

@@ -48,6 +48,10 @@ function getUsers() {
   return User.find();
 }
 
+function getUsersByRoles(roles) {
+  return User.find({ role: { $in: roles } });
+}
+
 function getRoles() {
   return [
     {
@@ -101,6 +105,7 @@ module.exports = {
   login,
   getUser,
   getUsers,
+  getUsersByRoles,
   getRoles,
   deleteUser,
   editUser,

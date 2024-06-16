@@ -19,6 +19,8 @@ export const Location = () => {
 				paths.push(paths[index - 1] + '/' + element);
 				if (index === 2 && names[index - 1] === ' / catalog') {
 					names.push(' / product');
+				} else if (index === 2 && element !== 'stats' && names[index - 1] === ' / sales') {
+					names.push(' / sale');
 				} else {
 					names.push(' / ' + element);
 				}
@@ -47,7 +49,6 @@ export const Location = () => {
 
 const LocationContainer = styled.div`
 	// background-color: white;
-	// text-align: center;
 	margin: 100px auto 20px;
 	padding-left: 10px;
 	width: 1100px;

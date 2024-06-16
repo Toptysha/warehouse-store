@@ -33,13 +33,7 @@ const AppSlice = createSlice({
 		}
     },
     extraReducers: (builder) => {
-        // builder
-        //     .addCase(getDicesFromDb.fulfilled, (state, action) => {
 
-        //     })
-            // .addCase(rollDices.fulfilled, (state, action) => {
-
-            // })
     }
 })
 

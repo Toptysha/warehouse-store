@@ -21,12 +21,10 @@ export const deletePhoto = (photoUrl: string) => {
 		data.typeOfPhoto = arrOfUrl[5] as PhotoType;
 		data.id = arrOfUrl[4];
 	}
-	console.log(data);
 
 	request(`/products/delete-photo`, 'POST', data).then(({ error, data }) => {
 		if (error) {
 			console.log(error);
 		}
-		console.log(data);
 	});
 };

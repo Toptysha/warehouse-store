@@ -9,3 +9,5 @@ export * from './change-product-info';
 export * from './delete-photo';
 export * from './format-date-from-db';
 export * from './check-access';
+export * from './trimming-text';
+export * from './react-select-styles';

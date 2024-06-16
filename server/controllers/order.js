@@ -13,7 +13,7 @@ async function getOrders(search = "", limit = 10, page = 1) {
         { name: { $regex: search, $options: "i" } },
         { phone: { $regex: search, $options: "i" } },
         { address: { $regex: search, $options: "i" } },
-        { delivery: { $regex: search, $options: "i" } },
+        { deliveryType: { $regex: search, $options: "i" } },
         { totalPrice: { $regex: search, $options: "i" } },
       ],
     })
@@ -24,7 +24,7 @@ async function getOrders(search = "", limit = 10, page = 1) {
       { name: { $regex: search, $options: "i" } } || {
           phone: { $regex: search, $options: "i" },
         } || { address: { $regex: search, $options: "i" } } || {
-          delivery: { $regex: search, $options: "i" },
+          deliveryType: { $regex: search, $options: "i" },
         } || { totalPrice: { $regex: search, $options: "i" } }
     ),
   ]);
@@ -39,8 +39,18 @@ function getOrder(id) {
   return Order.findById(id);
 }
 
+function getOrdersByDate(startDate, endDate) {
+  return Order.find({
+    createdAt: {
+      $gte: new Date(startDate),
+      $lte: new Date(endDate),
+    },
+  });
+}
+
 module.exports = {
   addOrder,
   getOrders,
   getOrder,
+  getOrdersByDate,
 };

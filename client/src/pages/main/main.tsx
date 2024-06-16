@@ -6,7 +6,7 @@ import { useAppDispatch } from '../../redux/store';
 import { closeLoader } from '../../redux/reducers';
 import cover1 from '../../images/cover1.jpg';
 import cover2 from '../../images/cover2.jpg';
-// import cover3 from '../../images/cover3.jpg';
+import cover3 from '../../images/cover3.jpg';
 import cover4 from '../../images/cover4.jpg';
 import styled from 'styled-components';
 import { BlockContent } from './components';
@@ -34,7 +34,7 @@ export const Main = () => {
 					<MainContainer>
 						<BlockContent srcCover={cover1} description="Каталог товаров" onClick={() => onClick('/catalog')} />
 						<BlockContent srcCover={cover2} description="Оформить заказ" onClick={() => onClick('/order')} />
-						{/* <BlockContent srcCover={cover3} description="Возврат/обмен" onClick={() => onClick('/catalog')} /> */}
+						<BlockContent srcCover={cover3} description="Возврат/обмен" onClick={() => onClick('/catalog')} />
 						<BlockContent srcCover={cover4} description="Продажи" onClick={() => onClick('/sales')} />
 					</MainContainer>
 				) : (

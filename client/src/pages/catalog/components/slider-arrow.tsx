@@ -15,7 +15,6 @@ export const SliderArrow = ({ $arrowDirection, onClick }: { $arrowDirection: Pro
 
 const SliderArrowContainer = styled.div<Props>`
 	cursor: pointer;
-	// background-color: rgba(255, 255, 255, 0.1);
 	top: 0;
 	${(p) => (p.$arrowDirection === 'left' ? 'left: 0;' : 'right: 0;')};
 	height: 290px;
@@ -31,11 +30,6 @@ const SliderArrowContainer = styled.div<Props>`
 		height: 40px;
 		opacity: 0.6;
 	}
-
-	// &:hover {
-	// 	background-color: rgba(255, 255, 255, 0.4);
-	// 	transition: 0.5s ease;
-	// }
 
 	&:hover img {
 		opacity: 1;

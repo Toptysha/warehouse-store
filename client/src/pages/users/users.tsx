@@ -8,7 +8,7 @@ import { formatDateFromDb, request } from '../../utils';
 import { closeLoader } from '../../redux/reducers';
 import { User } from '../../interfaces';
 import { UserRow } from './components';
-import { ROLE } from '../../constants';
+import { ACCESS } from '../../constants';
 
 export const Users = () => {
 	const [users, setUsers] = useState<User[]>([]);
@@ -21,7 +21,6 @@ export const Users = () => {
 				console.log(error);
 				dispatch(closeLoader());
 			} else {
-				// console.log(data);
 				setUsers(data.map((user: any) => ({ ...user, registeredAt: formatDateFromDb(user.registeredAt) })));
 				dispatch(closeLoader());
 			}
@@ -31,7 +30,7 @@ export const Users = () => {
 	return loader ? (
 		<Loader />
 	) : (
-		<PrivateContent access={[ROLE.ADMIN.toString()]}>
+		<PrivateContent access={ACCESS.USERS}>
 			<UsersContainer>
 				<div className="users">
 					<div className="table-header">
@@ -61,7 +60,6 @@ const UsersContainer = styled.div`
 		// background-color: #fff;
 		display: flex;
 		flex-wrap: wrap;
-		// justify-content: center;
 		width: 100%;
 		max-height: 70vh;
 		overflow-y: auto;
@@ -88,6 +86,5 @@ const UsersContainer = styled.div`
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		// border: 1px solid black;
 	}
 `;

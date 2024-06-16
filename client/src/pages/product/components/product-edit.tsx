@@ -77,7 +77,6 @@ export const ProductEdit = () => {
 			if (error) {
 				console.log(error);
 			}
-			// console.log(data);
 			setIsPageRefresh(!isPageRefresh);
 		});
 	};
@@ -90,7 +89,6 @@ export const ProductEdit = () => {
 
 	const handleSavePhotos = async (typePhotos: PhotoType) => {
 		await uploadPhotos(params.id as string, typePhotos, typePhotos === PHOTO_TYPES.COVER ? selectedCoverFiles : selectedMeasurementsFiles, currentSize).then((data) => {
-			console.log(data);
 			setIsPageRefresh(!isPageRefresh);
 			setSelectedCoverFiles([]);
 			setSelectedMeasurementsFiles([]);
@@ -176,13 +174,6 @@ export const ProductEdit = () => {
 									)}
 								</p>
 								<Button description="🖊️ред." onClick={() => handleEditClick(point[0], point[1])} />
-								{/* <Button description="🖊️" onClick={() => handleEditClick(point[0], point[1])} /> */}
-								{/* <Button
-								description="💾"
-								onClick={() => {
-									handleSaveInfo(point[0], point[2]);
-								}}
-							/> */}
 							</div>
 						))}
 						<div className="size-range">

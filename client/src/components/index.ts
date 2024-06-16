@@ -13,3 +13,6 @@ export * from './modal/modal';
 export * from './location/location';
 export * from './loader/loader';
 export * from './private-content/private-content';
+export * from './switcher/switcher';
+export * from './delete-line/delete-line';
+export * from './photo-with-delete-line/photo-with-delete-line';

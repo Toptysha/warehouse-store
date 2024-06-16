@@ -3,7 +3,6 @@ import ReactInputMask from 'react-input-mask';
 import styled from 'styled-components';
 
 export const InputMask = React.forwardRef(({ ...props }: { placeholder?: string; width?: string; onChange?: any }, ref: React.Ref<HTMLInputElement>) => {
-	// return <InputMaskContainer mask="+7 (999) 999-99-99" placeholder={placeholder} type={type} width={width} {...props} />;
 	return <InputMaskContainer mask="+7 (999) 999-99-99" {...props} />;
 });
 

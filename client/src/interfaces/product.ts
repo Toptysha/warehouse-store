@@ -9,3 +9,10 @@ export interface Product {
 	createdAt: string,
 	updatedAt: string
 }
+
+export interface UpdatedProduct extends Product {
+	cover: string;
+	oldPrice: string;
+	size: string;
+	isDeletedSize: boolean;
+}

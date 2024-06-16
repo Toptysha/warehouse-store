@@ -5,6 +5,7 @@ export interface Order {
 	delivery: string
 	products: {
 		productId: string
+		productArticle: string
 		size: string
 		price: string
 	}[]

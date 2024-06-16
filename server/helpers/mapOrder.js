@@ -4,9 +4,11 @@ module.exports = function (order) {
     name: order.name,
     phone: order.phone,
     address: order.address,
-    delivery: order.delivery,
-    products: order.orders.map(({ product, size, price }) => ({
+    deliveryType: order.deliveryType,
+    deliveryPrice: order.deliveryPrice,
+    product: order.orders.map(({ product, size, price }) => ({
       productId: product,
+      productArticle: product,
       size,
       price,
     })),

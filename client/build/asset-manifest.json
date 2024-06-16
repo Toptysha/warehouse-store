@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.css": "/static/css/main.32ec0d11.css",
+    "main.js": "/static/js/main.c48a6411.js",
+    "static/media/cover1.jpg": "/static/media/cover1.39fea1ca45702d71881b.jpg",
+    "static/media/cover2.jpg": "/static/media/cover2.d9d686cf424b60f620eb.jpg",
+    "static/media/cover4.jpg": "/static/media/cover4.2d4087219e6643ae5abf.jpg",
+    "static/media/arrows.png": "/static/media/arrows.66a2e9cc30a73d593bac.png",
+    "static/media/no_img.jpg": "/static/media/no_img.194e450d596de7ebe9cd.jpg",
+    "static/media/hanger-logo.png": "/static/media/hanger-logo.d33d434abbf684ab1a7f.png",
+    "static/media/arrow-e5e5e5.png": "/static/media/arrow-e5e5e5.7910fe572a1febf25565.png",
+    "static/media/beauty-logo.png": "/static/media/beauty-logo.b84c0a0c3cd1e28cdeb9.png",
+    "index.html": "/index.html",
+    "main.32ec0d11.css.map": "/static/css/main.32ec0d11.css.map",
+    "main.c48a6411.js.map": "/static/js/main.c48a6411.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.32ec0d11.css",
+    "static/js/main.c48a6411.js"
+  ]
+}

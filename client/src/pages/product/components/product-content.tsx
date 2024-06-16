@@ -47,12 +47,22 @@ export const ProductContent = () => {
 				<div className="main-info">
 					<div className="cover">{covers !== undefined ? <img src={covers[0]} alt="Cover" /> : <img src={noImage} alt="NO COVER" />}</div>
 					<div className="product-card-info">
-						<p>{`Артикул: ${product.article}`}</p>
-						<p>{`Бренд: ${product.brand}`}</p>
-						<p>{`Наименование: ${product.name}`}</p>
-						<p>{`Цвет: ${product.color}`}</p>
-						<p>{`Цена: ${product.price}`}</p>
-						<p>{`Размеры: `}</p>
+						<p>
+							Артикул: <span>{product.article}</span>
+						</p>
+						<p>
+							Бренд: <span>{product.brand}</span>
+						</p>
+						<p>
+							Наименование: <span>{product.name}</span>
+						</p>
+						<p>
+							Цвет: <span>{product.color}</span>
+						</p>
+						<p>
+							Цена: <span>{product.price}</span>
+						</p>
+						<p>Размеры:</p>
 						{product.sizes.includes('Нет в наличии') ? (
 							<div className="not-available">Нет в наличии</div>
 						) : (
@@ -92,7 +102,6 @@ export const ProductContent = () => {
 const ProductContentContainer = styled.div`
 	width: 1100px;
 	margin: 0 auto;
-	padding-top: 25px;
 	min-height: 900px;
 
 	& .main-info {
@@ -120,7 +129,15 @@ const ProductContentContainer = styled.div`
 	}
 
 	& .product-card-info p {
-		margin-bottom: 10px;
+		width: 100%;
+		font-size: 22px;
+		font-weight: 400;
+		margin: 0px 0 5px 10px;
+	}
+
+	& .product-card-info span {
+		font-size: 24px;
+		font-weight: 500;
 	}
 
 	& .sizes {

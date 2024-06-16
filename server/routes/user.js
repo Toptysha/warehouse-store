@@ -5,6 +5,7 @@ const {
   getRoles,
   editUser,
   deleteUser,
+  getUsersByRoles,
 } = require("../controllers/user");
 const hasRole = require("../middlewares/hasRole");
 const authenticated = require("../middlewares/authenticated");
@@ -25,11 +26,25 @@ router.get("/", authenticated, hasRole(ACCESS.USERS), async (req, res) => {
 router.get(
   "/:id",
   authenticated,
-  hasRole(ACCESS.WATCH_PRODUCTS),
+  hasRole(ACCESS.GET_USER),
   async (req, res) => {
     try {
       const user = await getUser(req.params.id);
       res.send({ data: mapUser(user) });
+    } catch (err) {
+      res.send({ error: err.message || "Unknown Error", errorPath: err.path });
+    }
+  }
+);
+
+router.post(
+  "/by_roles",
+  authenticated,
+  hasRole(ACCESS.GET_USER),
+  async (req, res) => {
+    try {
+      const users = await getUsersByRoles(req.body.roleIds);
+      res.send({ data: users.map(mapUser) });
     } catch (err) {
       res.send({ error: err.message || "Unknown Error", errorPath: err.path });
     }

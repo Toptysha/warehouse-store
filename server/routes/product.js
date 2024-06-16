@@ -150,7 +150,6 @@ router.patch(
         });
         res.send({ data: updatedProduct });
       } catch (err) {
-        console.log("TEST0", err);
         res.send({ error: err.message || "Unknown Error" });
       }
     }

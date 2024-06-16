@@ -31,11 +31,8 @@ export const Catalog = () => {
 	useEffect(() => {
 		request(`/products?search=${searchPhrase}&page=${page}&limit=${PAGINATION_LIMIT}`).then(({ error, data }) => {
 			if (error) {
-				console.log('/catalog', error);
-				// dispatch(setError(error));
 				dispatch(closeLoader());
 			} else {
-				console.log('/catalog', data);
 				setProducts(data.products);
 				setLastPage(data.lastPage);
 				setImages(data.coversUrls);
@@ -105,8 +102,7 @@ const CatalogContainer = styled.div`
 	flex-wrap: wrap;
 	justify-content: center;
 	width: 1100px;
-	margin: 60px auto 0;
-	padding-top: 25px;
+	margin: 0 auto;
 	min-height: 1100px;
 
 	& .products-container {

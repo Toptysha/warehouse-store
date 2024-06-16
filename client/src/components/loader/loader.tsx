@@ -19,7 +19,6 @@ const LoaderContainer = styled.div`
 
 	& .overlay {
 		position: absolute;
-		// background: rgba(0, 0, 0, 0.5);
 		width: 100%;
 		height: 100%;
 	}
@@ -38,7 +37,6 @@ const LoaderContainer = styled.div`
 	}
 
 	& .loader {
-		// margin: 50%;
 		width: 45px;
 		aspect-ratio: 1;
 		--c: no-repeat linear-gradient(#000 0 0);

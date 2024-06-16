@@ -45,33 +45,6 @@ function photosDirectory(
   );
 }
 
-// async function addPhotos({ photos, folder, typePhotos, currentSize }) {
-//   // console.log("TEST2", photos, folder, typePhotos, currentSize);
-
-//   try {
-//     // Создаем папку для сохранения файлов, если она не существует
-//     const uploadDir =
-//       typePhotos === PHOTOS_TYPE.TYPE_COVER
-//         ? photosDirectory(folder, PHOTOS_URLS.COVER_FOLDER)
-//         : photosDirectory(folder, PHOTOS_URLS.MEASUREMENTS_FOLDER, currentSize);
-//     if (!(await fs.access(uploadDir).catch(() => false))) {
-//       await fs.mkdir(uploadDir, { recursive: true });
-//     }
-
-//     // Сохраняем файлы в папку
-//     await Promise.all(
-//       photos.map(async (photo) => {
-//         const photoPath = path.join(uploadDir, photo.originalname);
-//         await fs.writeFile(photoPath, photo.buffer);
-//       })
-//     );
-
-//     console.log("Файлы успешно сохранены");
-//   } catch (error) {
-//     console.error("Ошибка при сохранении файлов:", error);
-//   }
-// }
-
 async function addPhotos({ photos, folder, typePhotos, currentSize }) {
   try {
     const uploadDir =
@@ -79,12 +52,10 @@ async function addPhotos({ photos, folder, typePhotos, currentSize }) {
         ? photosDirectory(folder, PHOTOS_URLS.COVER_FOLDER)
         : photosDirectory(folder, PHOTOS_URLS.MEASUREMENTS_FOLDER, currentSize);
 
-    // Create the directory if it doesn't exist
     if (!(await fs.access(uploadDir).catch(() => false))) {
       await fs.mkdir(uploadDir, { recursive: true });
     }
 
-    // Read existing files in the directory
     const existingFiles = await fs.readdir(uploadDir);
     const maxFiles = typePhotos === PHOTOS_TYPE.TYPE_COVER ? 6 : 10;
     const availableSlots = maxFiles - existingFiles.length;
@@ -95,7 +66,6 @@ async function addPhotos({ photos, folder, typePhotos, currentSize }) {
       return;
     }
 
-    // Add new files up to the available limit
     await Promise.all(
       photos.slice(0, filesToAdd).map(async (photo) => {
         const photoPath = path.join(uploadDir, photo.originalname);
@@ -127,7 +97,7 @@ async function getCovers(products) {
           );
         });
       } catch (err) {
-        // console.error("Ошибка чтения папки:", err);
+        console.error("Ошибка чтения папки:", err);
       }
 
       return { [product.id]: filePaths };
@@ -151,7 +121,7 @@ async function getCover(id) {
     });
     return filePaths;
   } catch (err) {
-    // console.error("Ошибка чтения папки:", err);
+    console.error("Ошибка чтения папки:", err);
   }
 }
 
@@ -173,7 +143,7 @@ async function getMeasurements(id) {
       );
     });
   } catch (err) {
-    // console.error("Ошибка чтения папки:", err);
+    console.error("Ошибка чтения папки:", err);
   }
 
   let filesInFolder = folders.map((folder) => ({ [folder]: [] }));
@@ -190,7 +160,7 @@ async function getMeasurements(id) {
       })
     );
   } catch (err) {
-    // console.error("Ошибка чтения папки:", err);
+    console.error("Ошибка чтения папки:", err);
   }
 
   return filesInFolder;

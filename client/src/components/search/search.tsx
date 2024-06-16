@@ -1,4 +1,3 @@
-import { COLORS } from '../../constants';
 import { Button } from '../button/button';
 import { Input } from '../input/input';
 import styled from 'styled-components';
@@ -24,7 +23,6 @@ export const Search = ({
 
 const SearchContainer = styled.div<{ width?: string }>`
 	background: #fff4fc;
-	// background: ${COLORS.HEADER};
 	display: flex;
 	width: ${({ width = '100%' }) => width};
 	height: 40px;

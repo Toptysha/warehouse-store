@@ -34,6 +34,8 @@ const regFormScheme = yup.object().shape({
 
 export const Registration = () => {
 	const [phone, setPhone] = useState('');
+	const [viewError, setViewError] = useState<boolean>(false);
+
 	const {
 		register,
 		handleSubmit,
@@ -56,6 +58,12 @@ export const Registration = () => {
 	const user = useSelector(selectUser);
 
 	const onSubmit = ({ login, password }: { login: string; password: string }) => {
+		if (!phone) {
+			setViewError(true);
+			setTimeout(() => setViewError(false), 2500);
+			return;
+		}
+
 		const phoneFormat = phone.replaceAll(' ', '').replaceAll('-', '').replaceAll('(', '').replaceAll(')', '');
 		request('/register', 'POST', { login, phone: phoneFormat, password }).then(({ error, data }) => {
 			if (error) {
@@ -67,8 +75,13 @@ export const Registration = () => {
 		});
 	};
 
-	const formError = errors?.login?.message || errors?.password?.message || errors?.passCheck?.message;
-	const errorMessage = formError || serverError;
+	let allErrors = {
+		serverError,
+		formError: errors?.password?.message,
+		phoneError: !phone && viewError ? 'Введите номер телефона' : '',
+	};
+
+	const error = allErrors.serverError || allErrors.phoneError || allErrors.formError;
 
 	if (user.roleId !== ROLE.GUEST) {
 		return <Navigate to="/" />;
@@ -88,8 +101,8 @@ export const Registration = () => {
 				/>
 				<Input type="password" placeholder="Пароль..." width="300px" {...register('password', { onChange: () => setServerError('') })} />
 				<Input type="password" placeholder="Повторите пароль..." width="300px" {...register('passCheck', { onChange: () => setServerError('') })} />
-				<Button className="reg-button" description="Зарегистрироваться" type="submit" disabled={!!formError} />
-				{errorMessage && <AuthFormError>{errorMessage}</AuthFormError>}
+				<Button className="reg-button" description="Зарегистрироваться" type="submit" disabled={!!error} />
+				{error ? <AuthFormError>{error}</AuthFormError> : null}
 			</form>
 			<Button description="Авторизация" onClick={() => navigate('/login')} />
 		</RegistrationContainer>
