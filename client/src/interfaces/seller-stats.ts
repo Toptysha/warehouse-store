@@ -7,3 +7,9 @@ export interface SellerStats {
 	currentMonthWage: string;
 	lastMonthWage: string;
 }
+
+export interface UnionSellerStats {
+	allSellerStats: SellerStats[];
+	onlineSellerStats: SellerStats[];
+	offlineSellerStats: SellerStats[];
+}

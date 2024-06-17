@@ -97,7 +97,7 @@ async function getCovers(products) {
           );
         });
       } catch (err) {
-        console.error("Ошибка чтения папки:", err);
+        // console.error("Ошибка чтения папки:", err);
       }
 
       return { [product.id]: filePaths };
@@ -121,7 +121,7 @@ async function getCover(id) {
     });
     return filePaths;
   } catch (err) {
-    console.error("Ошибка чтения папки:", err);
+    // console.error("Ошибка чтения папки:", err);
   }
 }
 
@@ -143,7 +143,7 @@ async function getMeasurements(id) {
       );
     });
   } catch (err) {
-    console.error("Ошибка чтения папки:", err);
+    // console.error("Ошибка чтения папки:", err);
   }
 
   let filesInFolder = folders.map((folder) => ({ [folder]: [] }));
@@ -160,7 +160,7 @@ async function getMeasurements(id) {
       })
     );
   } catch (err) {
-    console.error("Ошибка чтения папки:", err);
+    // console.error("Ошибка чтения папки:", err);
   }
 
   return filesInFolder;

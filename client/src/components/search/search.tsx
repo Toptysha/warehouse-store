@@ -26,7 +26,7 @@ const SearchContainer = styled.div<{ width?: string }>`
 	display: flex;
 	width: ${({ width = '100%' }) => width};
 	height: 40px;
-	margin: 40px auto 0;
+	margin: 0 auto;
 	border: 1px solid #000;
 	border-radius: 5px;
 

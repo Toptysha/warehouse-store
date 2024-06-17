@@ -11,3 +11,5 @@ export * from './format-date-from-db';
 export * from './check-access';
 export * from './trimming-text';
 export * from './react-select-styles';
+export * from './sales-stats-count';
+export * from './sellers-stats-count';

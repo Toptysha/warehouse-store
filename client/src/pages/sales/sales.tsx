@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Loader, Pagination, PrivateContent, Search, Switcher } from '../../components';
+import { Loader, Pagination, PrivateContent, Table } from '../../components';
 import { useSelector } from 'react-redux';
 import { selectApp } from '../../redux/selectors';
 import { useState } from 'react';
@@ -38,6 +38,7 @@ export const Sales = () => {
 	);
 
 	const currentSale = sales.filter((sale) => oneSale?.params.id === sale.id);
+	const tableHeaders = ['Заказчик', 'Телефон', 'Адрес', 'Доставка', 'Товар', 'Цена', 'Дата', 'Продавец'];
 
 	return loader ? (
 		<Loader />
@@ -45,34 +46,19 @@ export const Sales = () => {
 		<PrivateContent access={ACCESS.WATCH_SALES}>
 			{!oneSale ? (
 				<SalesContainer>
-					<div className="switcher">
-						<Switcher position={switcherPosition} setPosition={setSwitcherPosition} positionNames={switcherNames} />
-					</div>
-					<Search
-						searchPhrase={searchPhrase}
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchPhrase(event.target.value)}
-						onClick={() => setShouldSearch(!shouldSearch)}
-						width="500px"
+					<Table
+						headers={tableHeaders}
+						$headerFontSize="18px"
+						tablePoints={[
+							sales.map((sale, index) => <SalesRow key={index} sale={sale} />),
+							salesOnline.map((sale, index) => <SalesRow key={index} sale={sale} />),
+							salesOffline.map((sale, index) => <SalesRow key={index} sale={sale} />),
+						]}
+						isSwitcher={true}
+						isSearch={true}
+						switcherArgs={{ position: switcherPosition, setPosition: setSwitcherPosition, positionNames: switcherNames }}
+						searchArgs={{ searchPhrase, setSearchPhrase, shouldSearch, setShouldSearch }}
 					/>
-					<div className="sales">
-						<div className="table-header">
-							<div className="table-title">Заказчик:</div>
-							<div className="table-title">Телефон:</div>
-							<div className="table-title">Адрес:</div>
-							<div className="table-title">Доставка:</div>
-							<div className="table-title">Товар:</div>
-							<div className="table-title">Цена:</div>
-							<div className="table-title">Дата:</div>
-							<div className="table-title">Продавец:</div>
-						</div>
-						<div className="table-sales">
-							{switcherPosition === 0
-								? sales.map((sale, index) => <SalesRow key={index} sale={sale} />)
-								: switcherPosition === 1
-									? salesOnline.map((sale, index) => <SalesRow key={index} sale={sale} />)
-									: salesOffline.map((sale, index) => <SalesRow key={index} sale={sale} />)}
-						</div>
-					</div>
 					<div className="sales-stats">
 						<Link to={`/sales/stats`}>Статистика продаж</Link>
 					</div>
@@ -90,16 +76,8 @@ const SalesContainer = styled.div`
 	flex-wrap: wrap;
 	justify-content: center;
 	width: 1100px;
-	margin: 20px auto 40px;
+	margin: 0 auto 40px;
 	min-height: 80vh;
-
-	& .switcher {
-		// background-color: #fff;
-		width: 100%;
-		display: flex;
-		justify-content: center;
-		margin-bottom: -40px;
-	}
 
 	& .sales-stats {
 		width: 100%;
@@ -116,42 +94,5 @@ const SalesContainer = styled.div`
 
 	& .sales-stats a:hover {
 		text-decoration: none;
-	}
-
-	& .sales {
-		// background-color: #fff;
-		display: flex;
-		flex-wrap: wrap;
-		width: 100%;
-		margin: 20px auto 0;
-	}
-
-	& .table-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%;
-		height: 50px;
-		background-color: #f2f2f2;
-		border-radius: 10px;
-		margin-bottom: 10px;
-		padding: 0 20px;
-		box-sizing: border-box;
-		font-size: 18px;
-		font-weight: 600;
-	}
-
-	& .table-sales {
-		width: 100%;
-		max-height: 70vh;
-		overflow-y: auto;
-	}
-
-	& .table-title {
-		width: 25%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 	}
 `;
