@@ -30,8 +30,8 @@ export const ExchangeRow = ({ order, isReturned = false }: { order: Order; isRet
 						value
 					) : (
 						<div className="products-article">
-							{value.map(({ id, article }) => (
-								<div className="article" key={article}>
+							{value.map(({ id, article }, indexKey) => (
+								<div className="article" key={indexKey}>
 									<Link to={`/catalog/${id}`}>{article}</Link>
 								</div>
 							))}
