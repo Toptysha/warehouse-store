@@ -1,3 +1,19 @@
+export interface SellerStats {
+	seller: string;
+	currentMonthRevenueAmount: string;
+	lastMonthRevenueAmount: string;
+	currentMonthProductsAmount: string;
+	lastMonthProductsAmount: string;
+	currentMonthWage: string;
+	lastMonthWage: string;
+}
+
+export interface UnionSellerStats {
+	allSellerStats: SellerStats[];
+	onlineSellerStats: SellerStats[];
+	offlineSellerStats: SellerStats[];
+}
+
 export interface TotalStats {
 	currentMonthOnlineSellsTotalRevenueAmount: number;
 	currentMonthOfflineSellsTotalRevenueAmount: number;
@@ -18,3 +34,5 @@ export interface TotalStats {
 	lastMonthOfflineSellersTotalWage: number;
 	lastMonthTotalWage: number;
 }
+
+export interface UnionTotalStats extends UnionSellerStats, TotalStats {}

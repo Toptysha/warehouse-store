@@ -100,6 +100,17 @@ async function checkAuth(token) {
   return user;
 }
 
+async function getUserNameForOrders(orders) {
+  const ordersWithUserNames = await Promise.all(
+    orders.map(async (order) => {
+      const user = await User.findById(order.authorId);
+      return { ...order, author: user.login };
+    })
+  );
+
+  return ordersWithUserNames;
+}
+
 module.exports = {
   register,
   login,
@@ -110,4 +121,5 @@ module.exports = {
   deleteUser,
   editUser,
   checkAuth,
+  getUserNameForOrders,
 };

@@ -98,6 +98,32 @@ async function editProduct(id, product) {
   return updatedProduct;
 }
 
+async function getProductArticlesForOrders(orders) {
+  const ordersWithProductArticles = await Promise.all(
+    orders.map(async (order) => {
+      const productsWithArticles = await Promise.all(
+        order.product.map(async (products) => {
+          const productWithArticle = await Promise.all(
+            products.map(async (product) => {
+              const productData = await Product.findById(product.productId);
+              return {
+                ...product,
+                productArticle: productData?.article,
+              };
+            })
+          );
+
+          return productWithArticle;
+        })
+      );
+
+      return { ...order, product: productsWithArticles };
+    })
+  );
+
+  return ordersWithProductArticles;
+}
+
 module.exports = {
   addProduct,
   getProducts,
@@ -105,4 +131,5 @@ module.exports = {
   getProductByArticle,
   deleteProduct,
   editProduct,
+  getProductArticlesForOrders,
 };

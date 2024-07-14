@@ -4,16 +4,15 @@ import { ACCESS } from '../../constants';
 import { useSelector } from 'react-redux';
 import { selectApp } from '../../redux/selectors';
 import { useEffect, useState } from 'react';
-import { TotalStats, UnionSellerStats } from '../../interfaces';
-import { request, salesStatsCount, sellersStatsCount } from '../../utils';
+import { UnionTotalStats } from '../../interfaces';
+import { request, totalStatsCount } from '../../utils';
 import { useAppDispatch } from '../../redux/store';
 import { closeLoader } from '../../redux/reducers';
 import { SellersRow, TotalInfoBlock } from './components';
 
 export const SalesStats = () => {
 	const [switcherPosition, setSwitcherPosition] = useState(0);
-	const [sellerStats, setSellerStats] = useState<UnionSellerStats>({ allSellerStats: [], onlineSellerStats: [], offlineSellerStats: [] });
-	const [totalAmount, setTotalAmount] = useState<TotalStats>();
+	const [totalStatsAmount, setTotalStatsAmount] = useState<UnionTotalStats>();
 
 	const switcherNames = ['Все продажи', 'Продажи онлайн', 'Продажи в магазине'];
 
@@ -56,8 +55,7 @@ export const SalesStats = () => {
 
 				const [users, ordersByCurrentMonth, ordersByLastMonth] = await Promise.all(sellerStatsPromises);
 
-				setSellerStats(sellersStatsCount(users.data, ordersByCurrentMonth.data, ordersByLastMonth.data));
-				setTotalAmount(salesStatsCount(ordersByCurrentMonth.data, ordersByLastMonth.data));
+				setTotalStatsAmount(totalStatsCount(users.data, ordersByCurrentMonth.data, ordersByLastMonth.data));
 			} catch (error) {
 				console.error('Error fetching products:', error);
 			} finally {
@@ -73,19 +71,23 @@ export const SalesStats = () => {
 	) : (
 		<PrivateContent access={ACCESS.WATCH_SALE_STATS}>
 			<SalesStatsContainer>
-				<Table
-					headers={tableHeaders}
-					$headerFontSize="14px"
-					tablePoints={[
-						sellerStats.allSellerStats.map((seller) => <SellersRow key={seller.seller} seller={seller} />),
-						sellerStats.onlineSellerStats.map((seller) => <SellersRow key={seller.seller} seller={seller} />),
-						sellerStats.offlineSellerStats.map((seller) => <SellersRow key={seller.seller} seller={seller} />),
-					]}
-					isSwitcher={true}
-					isSearch={false}
-					switcherArgs={{ position: switcherPosition, setPosition: setSwitcherPosition, positionNames: switcherNames }}
-				/>
-				<TotalInfoBlock totalAmount={totalAmount as TotalStats} switcherPosition={switcherPosition} />
+				{totalStatsAmount && (
+					<>
+						<Table
+							headers={tableHeaders}
+							$headerFontSize="14px"
+							tablePoints={[
+								totalStatsAmount.allSellerStats.map((seller) => <SellersRow key={seller.seller} seller={seller} />),
+								totalStatsAmount.onlineSellerStats.map((seller) => <SellersRow key={seller.seller} seller={seller} />),
+								totalStatsAmount.offlineSellerStats.map((seller) => <SellersRow key={seller.seller} seller={seller} />),
+							]}
+							isSwitcher={true}
+							isSearch={false}
+							switcherArgs={{ position: switcherPosition, setPosition: setSwitcherPosition, positionNames: switcherNames }}
+						/>
+						<TotalInfoBlock totalAmount={totalStatsAmount} switcherPosition={switcherPosition} />
+					</>
+				)}
 			</SalesStatsContainer>
 		</PrivateContent>
 	);

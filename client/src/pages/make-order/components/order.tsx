@@ -1,15 +1,14 @@
 import * as yup from 'yup';
-import { AuthFormError, Button, Input, InputMask } from '../../../components';
-import { DELIVERY_TYPES } from '../../../constants';
+import { AuthFormError, Button, Input, InputMask, SelectedProductsForOrder } from '../../../components';
+import { deliveryTypes } from '../../../constants';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useState } from 'react';
-import { reactSelectStyles, request } from '../../../utils';
-import { Product, ReactSelectOptionType, UpdatedProduct } from '../../../interfaces';
+import { findProductsByArticle, reactSelectStyles, removeSizes, request } from '../../../utils';
+import { ReactSelectOptionType, UpdatedProduct } from '../../../interfaces';
 import Select, { SingleValue, InputActionMeta } from 'react-select';
-import { SelectedProducts } from '.';
 
 const orderFormScheme = yup.object().shape({
 	name: yup.string().required('Заполните имя заказчика'),
@@ -24,8 +23,6 @@ export const Order = ({ orderType }: { orderType: 'online' | 'offline' }) => {
 	const [articles, setArticles] = useState<ReactSelectOptionType[]>([{ value: '', label: '' }]);
 	const [products, setProducts] = useState<UpdatedProduct[]>([]);
 	const [viewError, setViewError] = useState<boolean>(false);
-
-	const deliveryTypes = Object.values(DELIVERY_TYPES).map((deliveryType) => ({ value: deliveryType, label: deliveryType }));
 
 	const navigate = useNavigate();
 
@@ -42,43 +39,14 @@ export const Order = ({ orderType }: { orderType: 'online' | 'offline' }) => {
 		resolver: yupResolver(orderFormScheme),
 	});
 
-	const onFindProducts = (inputValue: SingleValue<string>) => {
-		if (inputValue) {
-			setSelectedProduct(inputValue);
-
-			request(`/products/article`, 'POST', { partOfArticle: inputValue }).then(({ error, data }) => {
-				if (error) {
-					setArticles([{ value: 'no-match', label: 'Совпадений не найдено' }]);
-				} else {
-					const dataProducts = data.products.slice(0, 10);
-					setArticles(dataProducts.map((product: Product) => ({ value: product.article, label: product.article })));
-					if (inputValue === data.products[0].article) {
-						setProducts((prev) => [
-							...prev,
-							{
-								...data.products[0],
-								cover: data.coversUrls[0][data.products[0].id][0],
-								oldPrice: data.products[0].price,
-								size: data.products[0].sizes[0],
-								isDeletedSize: true,
-							},
-						]);
-					}
-				}
-			});
-		} else {
-			setSelectedProduct('');
-		}
-	};
-
 	const handleInputChange = (inputValue: string, actionMeta: InputActionMeta) => {
 		if (actionMeta.action === 'input-change') {
-			onFindProducts(inputValue);
+			findProductsByArticle(inputValue, setSelectedProduct, setArticles, setProducts);
 		}
 	};
 
 	const onSubmit = async ({ name, address, deliveryPrice }: { name: string; address: string; deliveryPrice: string }) => {
-		if (products.length === 0 || (!selectedDeliveryType && orderType === 'online') || (!phone && orderType === 'online')) {
+		if (products.length === 0 || (!selectedDeliveryType && orderType === 'online') || (!phone && orderType === 'online') || products.filter(({ size }) => !!size).length === 0) {
 			setViewError(true);
 			setTimeout(() => setViewError(false), 2500);
 			return;
@@ -90,11 +58,17 @@ export const Order = ({ orderType }: { orderType: 'online' | 'offline' }) => {
 			totalPrice += Number(price);
 		});
 
-		const orders = products.map(({ id, size, price }) => ({
-			product: id,
-			size,
-			price,
-		}));
+		const orders = products
+			.filter(({ size }) => !!size)
+			.map(({ id, size, price }) => {
+				return {
+					product: id,
+					size,
+					price,
+				};
+			});
+
+		console.log('TEST00', orders);
 
 		const phoneFormat = orderType === 'online' ? phone.replaceAll(' ', '').replaceAll('-', '').replaceAll('(', '').replaceAll(')', '') : 'offline';
 
@@ -106,7 +80,8 @@ export const Order = ({ orderType }: { orderType: 'online' | 'offline' }) => {
 			address,
 			deliveryPrice,
 			deliveryType,
-			orders,
+			isExchange: false,
+			orders: [orders],
 			totalPrice: totalPrice.toString(),
 		};
 
@@ -115,21 +90,7 @@ export const Order = ({ orderType }: { orderType: 'online' | 'offline' }) => {
 			if (response.error) {
 				console.log(response.error);
 			} else {
-				const updatePromises = products.map((product) => {
-					if (product.isDeletedSize) {
-						const newSizes = product.sizes.filter((deletedSize) => deletedSize !== product.size);
-						return request(`/products/${product.id}`, 'PATCH', {
-							brand: product.brand,
-							name: product.name,
-							color: product.color,
-							price: product.oldPrice,
-							sizes: newSizes,
-						});
-					}
-					return Promise.resolve();
-				});
-
-				await Promise.all(updatePromises);
+				await removeSizes(products);
 				navigate('/sales');
 			}
 		} catch (error) {
@@ -142,9 +103,13 @@ export const Order = ({ orderType }: { orderType: 'online' | 'offline' }) => {
 		phoneError: !phone && viewError ? 'Введите номер телефона' : '',
 		deliveryError: !selectedDeliveryType && viewError ? 'Выберите службу доставки' : '',
 		productError: products.length === 0 && viewError ? 'Выберите товары' : '',
+		validProductError: products.filter(({ size }) => !!size).length === 0 && viewError ? 'Выберите товары, существующие на складе' : '',
 	};
 
-	const error = orderType === 'online' ? allErrors.formError || allErrors.phoneError || allErrors.deliveryError || allErrors.productError : allErrors.productError;
+	const error =
+		orderType === 'online'
+			? allErrors.formError || allErrors.phoneError || allErrors.deliveryError || allErrors.productError || allErrors.validProductError
+			: allErrors.productError || allErrors.validProductError;
 
 	return (
 		<OrderContainer>
@@ -165,7 +130,6 @@ export const Order = ({ orderType }: { orderType: 'online' | 'offline' }) => {
 										setPhone(target.target.value);
 									}}
 								/>
-								{/* <Input placeholder="Телефон" width="300px" {...register('phone')} /> */}
 							</div>
 							<div className="form-point">
 								<div className="title">Адрес пункта доставки:</div>
@@ -196,7 +160,7 @@ export const Order = ({ orderType }: { orderType: 'online' | 'offline' }) => {
 						<Select
 							className="select-products"
 							value={selectedProduct ? { value: selectedProduct, label: selectedProduct } : null}
-							onChange={(option: SingleValue<ReactSelectOptionType>) => onFindProducts(option ? option.value : '')}
+							onChange={(option: SingleValue<ReactSelectOptionType>) => findProductsByArticle(option ? option.value : '', setSelectedProduct, setArticles, setProducts)}
 							onInputChange={handleInputChange}
 							options={articles}
 							isClearable
@@ -206,7 +170,7 @@ export const Order = ({ orderType }: { orderType: 'online' | 'offline' }) => {
 							styles={reactSelectStyles('200px')}
 						/>
 					</div>
-					<SelectedProducts products={products} setProducts={setProducts} />
+					<SelectedProductsForOrder products={products} setProducts={setProducts} />
 					{error ? <AuthFormError>{error}</AuthFormError> : null}
 					<div className="form-point">
 						{orderType === 'online' ? (

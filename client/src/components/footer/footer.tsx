@@ -35,20 +35,30 @@ export const Footer = () => {
 	);
 };
 
-export const FooterContainer = styled.div`
+const FooterContainer = styled.footer`
+	width: 100%;
+	min-width: 1100px;
+	height: 60px;
+	background-color: #e5e5e5;
+	font-weight: 500;
 	display: flex;
 	justify-content: center;
-	background: #e5e5e5;
-	font-weight: bold;
-	width: 100%;
-	height: 60px;
-	padding: 10px;
+	align-items: center;
+	position: relative;
 	margin-top: 25px;
+	padding: 20px;
+	bottom: 0;
+
+	@media (min-width: 1100px) {
+		height: 80px;
+	}
 
 	& .info-container {
-		// background: red;
-		width: 1100px;
+		width: 100%;
+		min-width: 300px;
+		max-width: 1100px;
 		display: flex;
 		justify-content: space-between;
+		padding: 0 20px;
 	}
 `;

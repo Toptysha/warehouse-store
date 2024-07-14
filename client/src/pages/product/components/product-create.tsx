@@ -79,12 +79,6 @@ export const ProductCreate = () => {
 
 		let sizes: string[] = [];
 
-		if (selectedSizes.length === 0) {
-			sizes.push('Нет в наличии');
-		} else {
-			sizes = selectedSizes;
-		}
-
 		request('/products', 'POST', { article, brand, name, color, price, sizes }).then(({ error, data }) => {
 			if (error) {
 				setServerError(`Ошибка запроса: ${error}`);

@@ -14,39 +14,25 @@ const {
   getMeasurements,
   deletePhoto,
 } = require("../controllers/photos");
+const {
+  addProductLog,
+  deleteProductLog,
+  changeProductInfoLog,
+  addProductPhotosLog,
+  removeProductPhotosLog,
+  deleteAllLogs,
+} = require("../controllers/log");
 const authenticated = require("../middlewares/authenticated");
 const hasRole = require("../middlewares/hasRole");
 const ACCESS = require("../constants/access");
 const mapProduct = require("../helpers/mapProduct");
 
 const multer = require("multer");
+const { checkProductChanges } = require("../utils/check-product-changes");
 
 const upload = multer();
 
 const router = express.Router({ mergeParams: true });
-
-router.post(
-  "/",
-  authenticated,
-  hasRole(ACCESS.EDIT_PRODUCTS),
-  async (req, res) => {
-    try {
-      const newProduct = await addProduct({
-        article: req.body.article,
-        brand: req.body.brand,
-        name: req.body.name,
-        color: req.body.color,
-        price: req.body.price,
-        sizes: req.body.sizes,
-        author: req.user._id,
-      });
-
-      res.send({ data: newProduct });
-    } catch (err) {
-      res.send({ error: err.message || "Unknown Error" });
-    }
-  }
-);
 
 router.get(
   "/",
@@ -89,6 +75,7 @@ router.get(
   }
 );
 
+// fake post по факту get
 router.post(
   "/article",
   authenticated,
@@ -110,13 +97,43 @@ router.post(
   }
 );
 
+router.post(
+  "/",
+  authenticated,
+  hasRole(ACCESS.EDIT_PRODUCTS),
+  async (req, res) => {
+    try {
+      const newProduct = await addProduct({
+        article: req.body.article,
+        brand: req.body.brand,
+        name: req.body.name,
+        color: req.body.color,
+        price: req.body.price,
+        sizes: req.body.sizes,
+        author: req.user._id,
+      });
+
+      await addProductLog(req.user._id, newProduct._id, req.body.article);
+
+      res.send({ data: newProduct });
+    } catch (err) {
+      res.send({ error: err.message || "Unknown Error" });
+    }
+  }
+);
+
 router.delete(
   "/:id",
   authenticated,
   hasRole(ACCESS.DELETE_PRODUCTS),
   async (req, res) => {
     try {
+      const product = await getProduct(req.params.id);
+
       await deleteProduct(req.params.id);
+
+      await deleteProductLog(req.user._id, req.params.id, product.article);
+
       res.send({ error: null, data: "Product was deleted" });
     } catch (err) {
       res.send({ error: err.message || "Unknown Error" });
@@ -129,29 +146,31 @@ router.patch(
   authenticated,
   hasRole(ACCESS.EDIT_PRODUCTS),
   async (req, res) => {
-    if (req.body.covers) {
-      try {
-        await addPhotos(req.params.id, {
-          covers: req.body.covers,
-          measurements: req.body.measurements,
-        });
-        res.send({ data: "Photos was updated" });
-      } catch (err) {
-        res.send({ error: err.message || "Unknown Error" });
+    try {
+      const oldProduct = await getProduct(req.params.id);
+
+      const updatedProduct = await editProduct(req.params.id, {
+        brand: req.body.brand,
+        name: req.body.name,
+        color: req.body.color,
+        price: req.body.price,
+        sizes: req.body.sizes,
+      });
+
+      // await deleteAllLogs();
+
+      if (checkProductChanges(oldProduct, updatedProduct)) {
+        await changeProductInfoLog(
+          req.user._id,
+          req.params.id,
+          oldProduct,
+          updatedProduct
+        );
       }
-    } else {
-      try {
-        const updatedProduct = await editProduct(req.params.id, {
-          brand: req.body.brand,
-          name: req.body.name,
-          color: req.body.color,
-          price: req.body.price,
-          sizes: req.body.sizes,
-        });
-        res.send({ data: updatedProduct });
-      } catch (err) {
-        res.send({ error: err.message || "Unknown Error" });
-      }
+
+      res.send({ data: updatedProduct });
+    } catch (err) {
+      res.send({ error: err.message || "Unknown Error" });
     }
   }
 );
@@ -163,12 +182,23 @@ router.post(
   upload.any(),
   async (req, res) => {
     try {
+      const product = await getProduct(req.body.folder);
+
       await addPhotos({
         photos: req.files,
         folder: req.body.folder,
         typePhotos: req.body.typePhotos,
         currentSize: req.body.currentSize,
       });
+
+      await addProductPhotosLog(
+        req.user._id,
+        req.body.folder,
+        product.article,
+        req.body.typePhotos,
+        req.body.currentSize
+      );
+
       res.send({ data: "Success" });
     } catch (err) {
       res.send({ error: err.message || "Unknown Error" });
@@ -182,12 +212,32 @@ router.post(
   hasRole(ACCESS.DELETE_PRODUCTS),
   async (req, res) => {
     try {
+      const product = await getProduct(req.body.id);
+
       await deletePhoto({
         fileName: req.body.fileName,
         sizeName: req.body.sizeName,
         typeOfPhoto: req.body.typeOfPhoto,
         id: req.body.id,
       });
+
+      if (req.body.sizeName) {
+        await removeProductPhotosLog(
+          req.user._id,
+          req.body.id,
+          product.article,
+          req.body.typeOfPhoto,
+          req.body.sizeName
+        );
+      } else {
+        await removeProductPhotosLog(
+          req.user._id,
+          req.body.id,
+          product.article,
+          req.body.typeOfPhoto
+        );
+      }
+
       res.send({ data: "Photo was deleted" });
     } catch (err) {
       res.send({ error: err.message || "Unknown Error" });

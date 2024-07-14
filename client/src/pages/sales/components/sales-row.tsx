@@ -1,32 +1,37 @@
 import styled from 'styled-components';
-import { Sale } from '../../../interfaces';
-import { formatDateFromDb, trimmingText } from '../../../utils';
+import { Order } from '../../../interfaces';
 import { Link, useNavigate } from 'react-router-dom';
 import { OFFLINE_DEAL } from '../../../constants';
+import { tableHeadersSale } from '../../../constants/table-headers-sale';
 
-export const SalesRow = ({ sale }: { sale: Sale }) => {
+export const SalesRow = ({ order }: { order: Order }) => {
 	const navigate = useNavigate();
 
 	const handleRowClick = (e: React.MouseEvent) => {
 		if (!(e.target as HTMLElement).closest('a')) {
-			navigate(`/sales/${sale.id}`);
+			navigate(`/sales/${order.id}`);
 		}
 	};
 
-	const isOfflineDeal = sale.address === OFFLINE_DEAL && sale.name === OFFLINE_DEAL;
+	const isOfflineDeal = order.address === OFFLINE_DEAL && order.name === OFFLINE_DEAL;
 
 	return (
 		<SalesRowContainer onClick={handleRowClick}>
-			<div className="infoPoint">{isOfflineDeal ? 'Магазин' : sale.name}</div>
-			<div className="infoPoint">{isOfflineDeal ? 'Магазин' : sale.phone}</div>
-			<div className="infoPoint">{isOfflineDeal ? 'Магазин' : trimmingText(sale.address, 10)}</div>
-			<div className="infoPoint">{isOfflineDeal ? 'Магазин' : sale.deliveryType}</div>
-			<div className="infoPoint">
-				<Link to={`/catalog/${sale.product.productId}`}>{sale.product.productArticle}</Link>
-			</div>
-			<div className="infoPoint">{sale.product.price}</div>
-			<div className="infoPoint">{formatDateFromDb(sale.createdAt)}</div>
-			<div className="infoPoint">{sale.authorId}</div>
+			{tableHeadersSale(order, isOfflineDeal).map(({ value }, index) => (
+				<div className="infoPoint" key={index}>
+					{typeof value === 'string' ? (
+						value
+					) : (
+						<div className="products-article">
+							{value.map(({ id, article }, index) => (
+								<div className="article" key={article + index}>
+									<Link to={`/catalog/${id}`}>{article}</Link>
+								</div>
+							))}
+						</div>
+					)}
+				</div>
+			))}
 		</SalesRowContainer>
 	);
 };
@@ -37,7 +42,7 @@ const SalesRowContainer = styled.div`
 	justify-content: space-between;
 	align-items: center;
 	width: 100%;
-	height: 50px;
+	min-height: 50px;
 	background-color: #f2f2f2;
 	border-radius: 10px;
 	margin-bottom: 10px;
@@ -79,5 +84,9 @@ const SalesRowContainer = styled.div`
 		position: absolute;
 		background: none;
 		border: none;
+	}
+
+	& .article {
+		margin: 5px;
 	}
 `;

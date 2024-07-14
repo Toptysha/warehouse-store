@@ -1,6 +1,6 @@
-import { Order, TotalStats } from "../interfaces"
+import { TotalStats, UnionSellerStats } from "../interfaces"
 
-export const salesStatsCount = (ordersByCurrentMonth: Order[], ordersByLastMonth: Order[]): TotalStats => {
+export const salesStatsCount = (sellerStats: UnionSellerStats): TotalStats => {
 	let currentMonthOnlineSellsTotalRevenueAmount = 0
 	let currentMonthOfflineSellsTotalRevenueAmount = 0
 	let currentMonthTotalRevenueAmount = 0
@@ -20,32 +20,29 @@ export const salesStatsCount = (ordersByCurrentMonth: Order[], ordersByLastMonth
 	let	lastMonthOfflineSellersTotalWage = 0
 	let lastMonthTotalWage = 0
 
-	ordersByCurrentMonth.forEach((order) => {
-		if (order.address === 'offline') {
-			currentMonthOfflineSellsTotalRevenueAmount += Number(order.totalPrice)
-			currentMonthTotalRevenueAmount += Number(order.totalPrice)
-			currentMonthOfflineSellsTotalProductsAmount += order.product.length;
-			currentMonthTotalProductsAmount += order.product.length;
-		} else if (order.address !== 'offline') {
-			currentMonthOnlineSellsTotalRevenueAmount += Number(order.totalPrice) - Number(order.deliveryPrice)
-			currentMonthTotalRevenueAmount += Number(order.totalPrice) - Number(order.deliveryPrice)
-			currentMonthOnlineSellsTotalProductsAmount += order.product.length;
-			currentMonthTotalProductsAmount += order.product.length;
-		}
+	sellerStats.onlineSellerStats.forEach((order)  =>  {
+		currentMonthOnlineSellsTotalRevenueAmount += Number(order.currentMonthRevenueAmount)
+		lastMonthOnlineSellsTotalRevenueAmount += Number(order.lastMonthRevenueAmount)
+		currentMonthOnlineSellsTotalProductsAmount += Number(order.currentMonthProductsAmount)
+		lastMonthOnlineSellsTotalProductsAmount += Number(order.lastMonthProductsAmount)
+		currentMonthOnlineSellersTotalWage += Number(order.currentMonthWage)
+		lastMonthOnlineSellersTotalWage += Number(order.lastMonthWage)
 	})
-
-	ordersByLastMonth.forEach((order) => {
-		if (order.address === 'offline') {
-			lastMonthOfflineSellsTotalRevenueAmount += Number(order.totalPrice)
-			lastMonthTotalRevenueAmount += Number(order.totalPrice)
-			lastMonthOfflineSellsTotalProductsAmount += order.product.length;
-			lastMonthTotalProductsAmount += order.product.length;
-		} else if (order.address !== 'offline') {
-			lastMonthOnlineSellsTotalRevenueAmount += Number(order.totalPrice) - Number(order.deliveryPrice)
-			lastMonthTotalRevenueAmount += Number(order.totalPrice) - Number(order.deliveryPrice)
-			lastMonthOnlineSellsTotalProductsAmount += order.product.length;
-			lastMonthTotalProductsAmount += order.product.length;
-		}
+	sellerStats.offlineSellerStats.forEach((order)  =>  {
+		currentMonthOfflineSellsTotalRevenueAmount += Number(order.currentMonthRevenueAmount)
+		lastMonthOfflineSellsTotalRevenueAmount += Number(order.lastMonthRevenueAmount)
+		currentMonthOfflineSellsTotalProductsAmount += Number(order.currentMonthProductsAmount)
+		lastMonthOfflineSellsTotalProductsAmount += Number(order.lastMonthProductsAmount)
+		currentMonthOfflineSellersTotalWage += Number(order.currentMonthWage)
+		lastMonthOfflineSellersTotalWage += Number(order.lastMonthWage)
+	})
+	sellerStats.allSellerStats.forEach((order)  =>  {
+		currentMonthTotalRevenueAmount += Number(order.currentMonthRevenueAmount)
+		lastMonthTotalRevenueAmount += Number(order.lastMonthRevenueAmount)
+		currentMonthTotalProductsAmount += Number(order.currentMonthProductsAmount)
+		lastMonthTotalProductsAmount += Number(order.lastMonthProductsAmount)
+		currentMonthTotalWage += Number(order.currentMonthWage)
+		lastMonthTotalWage += Number(order.lastMonthWage)
 	})
 
 	currentMonthOnlineSellersTotalWage = Math.round((currentMonthOnlineSellsTotalRevenueAmount / 100) * 3.5)

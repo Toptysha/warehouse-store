@@ -44,7 +44,7 @@ export const UserRow = ({ id, login, phone, registeredAt, roleId }: { id: string
 						);
 					})}
 				</select>
-				{currentUser.id !== id && <Button description="💾" onClick={onSaveRole} disabled={Number(initialRoleId) === Number(selectedRoleId)} />}
+				{currentUser.id !== id && <Button description="💾" width="35px" onClick={onSaveRole} disabled={Number(initialRoleId) === Number(selectedRoleId)} />}
 			</div>
 		</UserRowContainer>
 	);

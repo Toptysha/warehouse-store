@@ -1,4 +1,4 @@
-interface SaleProduct {
+export interface SaleProduct {
 	productId: string
 	productArticle: string
 	size: string
@@ -11,14 +11,17 @@ export interface Sale {
 	address:string
 	deliveryType: string
 	deliveryPrice: string
+	isExchange: boolean
 	product: SaleProduct
 	phone: string
 	totalPrice: string
 	authorId: string
+	authorName?: string
+	author: string
 	createdAt: string
 	updatedAt: string
 }
 
 export interface Order extends Omit<Sale, 'product'> {
-	product: SaleProduct[];
+	product: SaleProduct[][]
   }

@@ -1,4 +1,3 @@
-export const DELIVERY_TYPES = {
-	CDEK: 'СДЭК',
-	POST_OFFICE_RUSSIA: 'Почта России',
-}
+import { DELIVERY_TYPE_OPTIONS } from "./delivery-type-options";
+
+export const deliveryTypes = Object.values(DELIVERY_TYPE_OPTIONS).map((deliveryType) => ({ value: deliveryType, label: deliveryType }));

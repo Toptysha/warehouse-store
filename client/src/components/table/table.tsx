@@ -3,8 +3,6 @@ import { Switcher } from '../switcher/switcher';
 import { Dispatch, SetStateAction } from 'react';
 import { Search } from '../search/search';
 
-// const headers = ['Заказчик', 'Телефон', 'Адрес', 'Доставка', 'Товар', 'Цена', 'Дата', 'Продавец']
-
 interface SwitcherArgs {
 	position: number;
 	setPosition: Dispatch<SetStateAction<number>>;
@@ -81,7 +79,6 @@ const TableContainer = styled.div<{ $headerFontSize?: string }>`
 		width: 100%;
 		display: flex;
 		justify-content: center;
-		// margin-bottom: -40px;
 	}
 
 	& .sales {
@@ -101,7 +98,6 @@ const TableContainer = styled.div<{ $headerFontSize?: string }>`
 		margin: 0 0 10px 0;
 		padding: 0px 20px;
 		box-sizing: border-box;
-		// font-size: 18px;
 		font-size: ${({ $headerFontSize = '18px' }) => $headerFontSize};
 		font-weight: 600;
 	}

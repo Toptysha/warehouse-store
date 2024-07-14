@@ -22,7 +22,7 @@ export const ProductCard = ({
 }) => {
 	const [disabledButtons, setDisabledButtons] = useState(false);
 	const navigate = useNavigate();
-	const deleteProductHandler = useDeleteProduct();
+	const deleteProductHandler = useDeleteProduct(product.id);
 
 	const userRole = useSelector(selectUser).roleId?.toString() as string;
 
@@ -47,7 +47,7 @@ export const ProductCard = ({
 						Цена: <span>{product.price}</span>
 					</p>
 					<p>
-						Размеры: <span>{product.sizes.join(', ')}</span>
+						Размеры: <span>{product.sizes.length > 0 ? product.sizes.join(', ') : <span className="red-info">Нет на складе</span>}</span>
 					</p>
 				</div>
 			</Link>
@@ -65,7 +65,7 @@ export const ProductCard = ({
 						description="Удалить"
 						disabled={disabledButtons}
 						onClick={() => {
-							deleteProductHandler(product.id, '/catalog', needRefreshPage, setNeedRefreshPage);
+							deleteProductHandler('/catalog', needRefreshPage, setNeedRefreshPage);
 						}}
 					/>
 				</div>
@@ -99,6 +99,10 @@ const ProductCardContainer = styled.div`
 	& .product-card-info span {
 		font-size: 16px;
 		font-weight: 500;
+	}
+
+	& .red-info {
+		color: red;
 	}
 
 	& .buttons {

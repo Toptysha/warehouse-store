@@ -17,3 +17,4 @@ export * from './switcher/switcher';
 export * from './delete-line/delete-line';
 export * from './photo-with-delete-line/photo-with-delete-line';
 export * from './table/table';
+export * from './selected-products-for-order/selected-products-for-order';

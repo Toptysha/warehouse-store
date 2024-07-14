@@ -16,7 +16,7 @@ export const Search = ({
 	return (
 		<SearchContainer width={width}>
 			<Input placeholder="Что найти?" width="400px" onChange={onChange} value={searchPhrase} />
-			<Button description="Поиск" onClick={onClick} />
+			<Button description="Поиск" width="70px" onClick={onClick} />
 		</SearchContainer>
 	);
 };

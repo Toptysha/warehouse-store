@@ -31,7 +31,6 @@ const SellersRowContainer = styled.div`
 
 	& .infoPoint {
 		// background-color: red;
-		// position: relative;
 		width: 25%;
 		height: 100%;
 		display: flex;

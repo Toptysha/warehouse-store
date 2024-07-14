@@ -11,6 +11,7 @@ const hasRole = require("../middlewares/hasRole");
 const authenticated = require("../middlewares/authenticated");
 const mapUser = require("../helpers/mapUser");
 const ACCESS = require("../constants/access");
+const { changeUserRoleLog } = require("../controllers/log");
 
 const router = express.Router({ mergeParams: true });
 
@@ -58,9 +59,18 @@ router.get("/roles", authenticated, hasRole(ACCESS.USERS), async (req, res) => {
 
 router.patch("/:id", authenticated, hasRole(ACCESS.USERS), async (req, res) => {
   try {
+    const oldUser = await getUser(req.params.id);
+
     const newUser = await editUser(req.params.id, {
       role: req.body.roleId,
     });
+
+    await changeUserRoleLog(
+      req.user._id,
+      req.params.id,
+      oldUser.role,
+      newUser.role
+    );
 
     res.send({ data: mapUser(newUser) });
   } catch (error) {

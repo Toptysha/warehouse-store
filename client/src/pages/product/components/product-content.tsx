@@ -1,19 +1,20 @@
 import noImage from '../../../images/no_img.jpg';
 import { useEffect, useState } from 'react';
 import { noMeasurementsSizes, request } from '../../../utils';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Measurement, Product } from '../../../interfaces';
 import styled from 'styled-components';
-import { Loader, PrivateContent } from '../../../components';
+import { Button, Loader, PrivateContent } from '../../../components';
 import { useSelector } from 'react-redux';
-import { selectApp } from '../../../redux/selectors';
+import { selectApp, selectUser } from '../../../redux/selectors';
 import { useAppDispatch } from '../../../redux/store';
 import { closeLoader, setError } from '../../../redux/reducers';
-import { ACCESS } from '../../../constants';
+import { ACCESS, PRODUCT } from '../../../constants';
+import { useDeleteProduct } from '../../../hooks';
 
 export const ProductContent = () => {
 	const params = useParams();
-	const [product, setProduct] = useState<Product>({ id: '', name: '', article: '', brand: '', color: '', price: '', sizes: [], createdAt: '', updatedAt: '' });
+	const [product, setProduct] = useState<Product>(PRODUCT);
 	const [covers, setCovers] = useState<string[]>([]);
 	const [measurementUrls, setMeasurementUrls] = useState<Measurement[]>([]);
 	const [noMeasurementSizes, setNoMeasurementSizes] = useState<string[]>([]);
@@ -22,6 +23,11 @@ export const ProductContent = () => {
 	const dispatch = useAppDispatch();
 
 	const loader = useSelector(selectApp).loader;
+	const userRole = useSelector(selectUser).roleId;
+
+	const deleteProductHandler = useDeleteProduct(product.id);
+
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		request(`/products/${params.id}`).then(({ error, errorPath, data }) => {
@@ -47,6 +53,25 @@ export const ProductContent = () => {
 				<div className="main-info">
 					<div className="cover">{covers !== undefined ? <img src={covers[0]} alt="Cover" /> : <img src={noImage} alt="NO COVER" />}</div>
 					<div className="product-card-info">
+						{ACCESS.EDIT_PRODUCTS.includes(userRole?.toString() as string) && (
+							<div className="buttons">
+								<Button
+									description={`Редактировать товар`}
+									width="190px"
+									onClick={() => {
+										navigate(`/catalog/${params.id}/edit`);
+									}}
+								/>
+								<Button
+									description={`Удалить товар`}
+									width="130px"
+									onClick={() => {
+										deleteProductHandler('/catalog');
+									}}
+								/>
+							</div>
+						)}
+
 						<p>
 							Артикул: <span>{product.article}</span>
 						</p>
@@ -62,19 +87,22 @@ export const ProductContent = () => {
 						<p>
 							Цена: <span>{product.price}</span>
 						</p>
-						<p>Размеры:</p>
-						{product.sizes.includes('Нет в наличии') ? (
-							<div className="not-available">Нет в наличии</div>
+						{product.sizes.length > 0 ? (
+							<>
+								<p>Размеры: </p>
+								<div className="sizes">
+									{product.sizes.map((size) => (
+										<div key={size} className={noMeasurementSizes.includes(size) ? 'size-red' : 'size-black'} onClick={() => setCurrentSize(size)}>
+											{size}
+										</div>
+									))}
+								</div>
+							</>
 						) : (
-							<div className="sizes">
-								{product.sizes.map((size) => (
-									<div key={size} className={noMeasurementSizes.includes(size) ? 'size-red' : 'size-black'} onClick={() => setCurrentSize(size)}>
-										{size}
-									</div>
-								))}
-							</div>
+							<p>
+								Размеры: <span className="red-info">Нет на складе</span>
+							</p>
 						)}
-						{}
 					</div>
 				</div>
 				<div className="measurements">
@@ -122,6 +150,23 @@ const ProductContentContainer = styled.div`
 		object-position: -40% 0;
 	}
 
+	& .buttons {
+		// background: #aaaaaa;
+		display: flex;
+		margin: 0 0 15px;
+	}
+
+	& .buttons button {
+		background: none;
+		border: none;
+		color: #d60000;
+		text-decoration: underline;
+	}
+
+	& .buttons button:hover {
+		text-decoration: none;
+	}
+
 	& .product-card-info {
 		width: 500px;
 		height: 400px;
@@ -146,7 +191,7 @@ const ProductContentContainer = styled.div`
 		flex-wrap: wrap;
 
 		align-items: center;
-		margin-bottom: 10px;
+		margin: 0 0 10px 10px;
 		border-radius: 5px;
 		border: 1px solid black;
 		padding: 5px;
@@ -162,7 +207,7 @@ const ProductContentContainer = styled.div`
 	}
 
 	& .size-red,
-	.not-available {
+	.red-info {
 		color: #d60000;
 	}
 

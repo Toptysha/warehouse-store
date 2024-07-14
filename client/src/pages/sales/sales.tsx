@@ -3,11 +3,11 @@ import { Loader, Pagination, PrivateContent, Table } from '../../components';
 import { useSelector } from 'react-redux';
 import { selectApp } from '../../redux/selectors';
 import { useState } from 'react';
-import { ACCESS, OFFLINE_DEAL } from '../../constants';
-import { OneSale, SalesRow } from './components';
-import { useSales } from '../../hooks';
-import { Sale } from '../../interfaces';
-import { Link, useMatch } from 'react-router-dom';
+import { ACCESS } from '../../constants';
+import { SalesRow } from './components';
+import { useOrders } from '../../hooks';
+import { Link } from 'react-router-dom';
+import { tableHeadersSale } from '../../constants/table-headers-sale';
 
 export const Sales = () => {
 	const [page, setPage] = useState(1);
@@ -16,57 +16,35 @@ export const Sales = () => {
 	const [switcherPosition, setSwitcherPosition] = useState(0);
 	const switcherNames = ['Все продажи', 'Продажи онлайн', 'Продажи в магазине'];
 
-	const oneSale = useMatch('/sales/:id');
-
 	const loader = useSelector(selectApp).loader;
 
-	const { sales, lastPage } = useSales(searchPhrase, page);
+	const { orders, ordersOnline, ordersOffline, lastPage } = useOrders(searchPhrase, page);
 
-	const { salesOnline, salesOffline } = sales.reduce<{
-		salesOnline: Sale[];
-		salesOffline: Sale[];
-	}>(
-		(acc, sale) => {
-			if (sale.name !== OFFLINE_DEAL && sale.phone !== OFFLINE_DEAL) {
-				acc.salesOnline.push(sale);
-			} else if (sale.name === OFFLINE_DEAL && sale.phone === OFFLINE_DEAL) {
-				acc.salesOffline.push(sale);
-			}
-			return acc;
-		},
-		{ salesOnline: [], salesOffline: [] },
-	);
-
-	const currentSale = sales.filter((sale) => oneSale?.params.id === sale.id);
-	const tableHeaders = ['Заказчик', 'Телефон', 'Адрес', 'Доставка', 'Товар', 'Цена', 'Дата', 'Продавец'];
+	const tableHeaders = tableHeadersSale().map(({ key }) => key);
 
 	return loader ? (
 		<Loader />
 	) : (
 		<PrivateContent access={ACCESS.WATCH_SALES}>
-			{!oneSale ? (
-				<SalesContainer>
-					<Table
-						headers={tableHeaders}
-						$headerFontSize="18px"
-						tablePoints={[
-							sales.map((sale, index) => <SalesRow key={index} sale={sale} />),
-							salesOnline.map((sale, index) => <SalesRow key={index} sale={sale} />),
-							salesOffline.map((sale, index) => <SalesRow key={index} sale={sale} />),
-						]}
-						isSwitcher={true}
-						isSearch={true}
-						switcherArgs={{ position: switcherPosition, setPosition: setSwitcherPosition, positionNames: switcherNames }}
-						searchArgs={{ searchPhrase, setSearchPhrase, shouldSearch, setShouldSearch }}
-					/>
-					<div className="sales-stats">
-						<Link to={`/sales/stats`}>Статистика продаж</Link>
-					</div>
-					{lastPage > 1 && <Pagination page={page} setPage={setPage} lastPage={lastPage} />}
-				</SalesContainer>
-			) : (
-				<OneSale sale={currentSale} />
-			)}
+			<SalesContainer>
+				<Table
+					headers={tableHeaders}
+					$headerFontSize="18px"
+					tablePoints={[
+						orders.map((order) => <SalesRow key={order.id} order={order} />),
+						ordersOnline.map((order) => <SalesRow key={order.id} order={order} />),
+						ordersOffline.map((order) => <SalesRow key={order.id} order={order} />),
+					]}
+					isSwitcher={true}
+					isSearch={true}
+					switcherArgs={{ position: switcherPosition, setPosition: setSwitcherPosition, positionNames: switcherNames }}
+					searchArgs={{ searchPhrase, setSearchPhrase, shouldSearch, setShouldSearch }}
+				/>
+				<div className="sales-stats">
+					<Link to={`/sales/stats`}>Статистика продаж</Link>
+				</div>
+				{lastPage > 1 && <Pagination page={page} setPage={setPage} lastPage={lastPage} />}
+			</SalesContainer>
 		</PrivateContent>
 	);
 };

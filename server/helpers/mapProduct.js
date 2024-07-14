@@ -1,3 +1,5 @@
+const { sortSizes } = require("../utils/sort-sizes");
+
 module.exports = function (product) {
   return {
     id: product.id,
@@ -6,7 +8,7 @@ module.exports = function (product) {
     brand: product.brand,
     color: product.color,
     price: product.price,
-    sizes: product.sizes,
+    sizes: sortSizes(product.sizes),
     createdAt: product.createdAt,
     updatedAt: product.updatedAt,
   };

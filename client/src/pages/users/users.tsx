@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Loader, PrivateContent } from '../../components';
+import { Loader, PrivateContent, Table } from '../../components';
 import { useSelector } from 'react-redux';
 import { selectApp } from '../../redux/selectors';
 import { useAppDispatch } from '../../redux/store';
@@ -27,13 +27,21 @@ export const Users = () => {
 		});
 	}, [dispatch]);
 
+	const tableHeaders = ['Логин', 'Телефон', 'Дата регистрации', 'Должность'];
+
 	return loader ? (
 		<Loader />
 	) : (
 		<PrivateContent access={ACCESS.USERS}>
 			<UsersContainer>
-				<div className="users">
-					<div className="table-header">
+				<Table
+					headers={tableHeaders}
+					$headerFontSize="18px"
+					tablePoints={[users.map((user) => <UserRow key={user.login} id={user.id} login={user.login} phone={user.phone} registeredAt={user.registeredAt} roleId={user.roleId} />)]}
+					isSwitcher={false}
+					isSearch={false}
+				/>
+				{/* <div className="table-header">
 						<div className="table-title">Логин:</div>
 						<div className="table-title">Телефон:</div>
 						<div className="table-title">Дата регистрации:</div>
@@ -41,50 +49,12 @@ export const Users = () => {
 					</div>
 					{users.map((user) => (
 						<UserRow key={user.login} id={user.id} login={user.login} phone={user.phone} registeredAt={user.registeredAt} roleId={user.roleId} />
-					))}
-				</div>
+					))} */}
 			</UsersContainer>
 		</PrivateContent>
 	);
 };
 
 const UsersContainer = styled.div`
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
-	width: 1100px;
-	margin: 40px auto;
 	min-height: 80vh;
-
-	& .users {
-		// background-color: #fff;
-		display: flex;
-		flex-wrap: wrap;
-		width: 100%;
-		max-height: 70vh;
-		overflow-y: auto;
-	}
-
-	& .table-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%;
-		height: 50px;
-		background-color: #f2f2f2;
-		border-radius: 10px;
-		margin-bottom: 10px;
-		padding: 0 20px;
-		box-sizing: border-box;
-		font-size: 18px;
-		font-weight: 600;
-	}
-
-	& .table-title {
-		width: 25%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
 `;

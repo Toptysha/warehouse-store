@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { changeProductInfo, noMeasurementsSizes, request, sortSizes, uploadPhotos } from '../../../utils';
+import { changeProductInfo, noMeasurementsSizes, request, uploadPhotos } from '../../../utils';
 import { useParams } from 'react-router-dom';
 import { PhotoType, Measurement, Product } from '../../../interfaces';
 import styled from 'styled-components';
@@ -27,7 +27,7 @@ export const ProductEdit = () => {
 
 	const dispatch = useAppDispatch();
 
-	const deleteProductHandler = useDeleteProduct();
+	const deleteProductHandler = useDeleteProduct(product.id);
 
 	const loader = useSelector(selectApp).loader;
 
@@ -151,7 +151,7 @@ export const ProductEdit = () => {
 							<Button
 								description={`Удалить товар`}
 								onClick={() => {
-									deleteProductHandler(params.id as string, '/catalog');
+									deleteProductHandler('/catalog');
 								}}
 							/>
 						</div>
@@ -193,8 +193,8 @@ export const ProductEdit = () => {
 							</div>
 							<Button description="Сохранить размерный ряд" onClick={() => handleSaveInfo('Размеры', 'sizes')} />
 						</div>
-						{sortSizes(product.sizes).includes('Нет в наличии') ? (
-							<div className="not-available">Нет в наличии</div>
+						{product.sizes.length === 0 ? (
+							<div className="not-available">Нет на складе</div>
 						) : (
 							<div className="sizes">
 								{product.sizes.map((size) => (
@@ -309,8 +309,6 @@ const ProductEditContainer = styled.div`
 	}
 
 	& .info-point input {
-		// display: inline-block;
-		// display: none;
 		margin: 0 0 0 10px;
 		width: 150px;
 		height: 25px;

@@ -34,7 +34,7 @@ export const Main = () => {
 					<MainContainer>
 						<BlockContent srcCover={cover1} description="Каталог товаров" onClick={() => onClick('/catalog')} />
 						<BlockContent srcCover={cover2} description="Оформить заказ" onClick={() => onClick('/order')} />
-						<BlockContent srcCover={cover3} description="Возврат/обмен" onClick={() => onClick('/catalog')} />
+						<BlockContent srcCover={cover3} description="Возвраты/обмены" onClick={() => onClick('/exchanges')} />
 						<BlockContent srcCover={cover4} description="Продажи" onClick={() => onClick('/sales')} />
 					</MainContainer>
 				) : (

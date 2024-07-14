@@ -48,6 +48,12 @@ export const Header = () => {
 		navigate('/users');
 	};
 
+	const onLogs = () => {
+		dispatch(openLoader());
+		setIsVisible(false);
+		navigate('/logs');
+	};
+
 	return user.roleId !== ROLE.GUEST ? (
 		<HeaderContainer>
 			<div className="content-block">
@@ -64,7 +70,7 @@ export const Header = () => {
 						<div className="name-menu" ref={divRef}>
 							<NameMenuPoint onClick={() => {}} description="Управление аккаунтом" />
 							<NameMenuPoint onClick={onUsers} description="Управление пользователями" />
-							<NameMenuPoint onClick={() => {}} description="Логи" />
+							<NameMenuPoint onClick={onLogs} description="Журнал действий" />
 							<NameMenuPoint onClick={onLogout} description="Выйти" />
 						</div>
 					)}

@@ -73,7 +73,7 @@ async function addPhotos({ photos, folder, typePhotos, currentSize }) {
       })
     );
 
-    console.log("Файлы успешно сохранены");
+    console.log("Фото успешно сохранены");
   } catch (error) {
     console.error("Ошибка при сохранении файлов:", error);
   }
