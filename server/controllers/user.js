@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
-const { generateToken, verifyToken } = require("../helpers/token");
+// const Token = require("../models/Token");
+const { generateAccessToken, verifyToken } = require("../helpers/token");
 const ROLES = require("../constants/roles");
 
 async function register(login, phone, password) {
@@ -11,11 +12,12 @@ async function register(login, phone, password) {
 
   const user = await User.create({ login, phone, password: hashPassword });
 
-  const token = generateToken({ id: user.id });
+  // const refreshToken = generateAccessToken({ id: user.id });
+  const accessToken = generateAccessToken({ id: user.id });
 
   return {
     user,
-    token,
+    token: accessToken,
   };
 }
 
@@ -32,7 +34,7 @@ async function login(phone, password) {
     throw new Error("Invalid password");
   }
 
-  const token = generateToken({ id: user.id });
+  const token = generateAccessToken({ id: user.id });
 
   return {
     user,

@@ -120,7 +120,7 @@ export const LogActionMessage = ({ log }: { log: ActionLog }) => {
 		case LOG_ACTIONS.PRODUCT_ACTIONS.ADD:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span>  Добавила новый товар - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>, 
+					<span className="author-name">{log.author}</span>  добавила новый товар - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>, 
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
@@ -135,29 +135,30 @@ export const LogActionMessage = ({ log }: { log: ActionLog }) => {
 		case LOG_ACTIONS.PRODUCT_ACTIONS.ADD_PHOTOS:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span>  Добавила товару - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>{' '}
-					{log.product?.isChangedMeasurements ? `замеров к ${log.product.changedMeasurementsSize} размеру` : `обложек`}, 
+					<span className="author-name">{log.author}</span>  добавила товару - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>
+					{log.product?.isChangedMeasurements ? ` замеров к ${log.product.changedMeasurementsSize} размеру` : ` обложек`}, 
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.PRODUCT_ACTIONS.REMOVE_PHOTOS:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span>  Добавила у товара - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>, 
+					<span className="author-name">{log.author}</span>  удалила у товара - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>
+					{log.product?.isChangedMeasurements ? ` замеры к ${log.product.changedMeasurementsSize} размеру` : ` обложки`}, 
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.PRODUCT_ACTIONS.REMOVE:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span>  Удалила товар - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>, 
+					<span className="author-name">{log.author}</span>  удалила товар - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>, 
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.ORDER_ACTIONS.ADD:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span> Создала <Link to={`/order/${log.order?.id}`}>ЗАКАЗ</Link>, 
+					<span className="author-name">{log.author}</span> создала <Link to={`/order/${log.order?.id}`}>ЗАКАЗ</Link>, 
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
@@ -177,7 +178,9 @@ export const LogActionMessage = ({ log }: { log: ActionLog }) => {
 								<div className="order-points" key={index}>
 									{orderPoint.key} c 
 									{checkProductsInOrder() ? (
-										<ProductArticles products={log.order?.productsOld as productsInOrdersLogs[]} />
+										<>
+											<ProductArticles products={log.order?.productsOld as productsInOrdersLogs[]} /> 
+										</>
 									) : (
 										<span className="log-info">{orderPoint.ValueOld} </span>
 									)}
@@ -198,14 +201,14 @@ export const LogActionMessage = ({ log }: { log: ActionLog }) => {
 		case LOG_ACTIONS.ORDER_ACTIONS.CANCEL:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span> Отменила <Link to={`/order/${log.order?.id}`}>ЗАКАЗ</Link>, 
+					<span className="author-name">{log.author}</span> отменила <Link to={`/order/${log.order?.id}`}>ЗАКАЗ</Link>, 
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.ORDER_ACTIONS.CANCEL_CANCELLATION:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span> Вернула <Link to={`/order/${log.order?.id}`}>ЗАКАЗ</Link>, 
+					<span className="author-name">{log.author}</span> вернула <Link to={`/order/${log.order?.id}`}>ЗАКАЗ</Link>, 
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
@@ -220,7 +223,7 @@ export const LogActionMessage = ({ log }: { log: ActionLog }) => {
 		default:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span>  Неизвестная операция, <div className="date">{formatDateFromDb(log.createdAt)}</div>
+					<span className="author-name">{log.author}</span>  неизвестная операция, <div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 	}
