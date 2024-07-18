@@ -1,5 +1,5 @@
 const express = require("express");
-const { register, login, checkAuth } = require("../controllers/user");
+const { register, login, checkAuth, getUserFromPG} = require("../controllers/user");
 const mapUser = require("../helpers/mapUser");
 
 const router = express.Router({ mergeParams: true });
@@ -39,6 +39,15 @@ router.get("/me", async (req, res) => {
   try {
     const user = await checkAuth(req.cookies.token);
     res.send({ data: mapUser(user) });
+  } catch (err) {
+    res.send({ error: err.message });
+  }
+});
+
+router.get("/test", async (req, res) => {
+  try {
+    const users = await getUserFromPG();
+    res.send({ data: users });
   } catch (err) {
     res.send({ error: err.message });
   }

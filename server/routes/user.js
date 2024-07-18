@@ -5,7 +5,7 @@ const {
   getRoles,
   editUser,
   deleteUser,
-  getUsersByRoles,
+  getUsersByRoles, getUserFromPG,
 } = require("../controllers/user");
 const hasRole = require("../middlewares/hasRole");
 const authenticated = require("../middlewares/authenticated");

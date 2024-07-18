@@ -3,6 +3,7 @@ const User = require("../models/User");
 // const Token = require("../models/Token");
 const { generateAccessToken, verifyToken } = require("../helpers/token");
 const ROLES = require("../constants/roles");
+const {prismaClient} = require("../prisma-service");
 
 async function register(login, phone, password) {
   if (!password) {
@@ -11,6 +12,11 @@ async function register(login, phone, password) {
   const hashPassword = await bcrypt.hash(password, 10);
 
   const user = await User.create({ login, phone, password: hashPassword });
+  await prismaClient.user.create({
+    data: { login, phone, password: hashPassword }
+  });
+
+  prismaClient.user.findMany().then((users) => users.forEach((user) => console.log('user.login', user.login)))
 
   // const refreshToken = generateAccessToken({ id: user.id });
   const accessToken = generateAccessToken({ id: user.id });
@@ -48,6 +54,10 @@ function getUser(id) {
 
 function getUsers() {
   return User.find();
+}
+
+function getUserFromPG() {
+  return prismaClient.user.findMany();
 }
 
 function getUsersByRoles(roles) {
@@ -124,4 +134,5 @@ module.exports = {
   editUser,
   checkAuth,
   getUserNameForOrders,
+  getUserFromPG
 };
