@@ -45,7 +45,9 @@ router.get(
         req.query.limit,
         req.query.page
       );
+
       const coversUrls = await getCovers(products);
+
       res.send({
         error: null,
         data: { products: products.map(mapProduct), coversUrls, lastPage },
@@ -65,6 +67,7 @@ router.get(
       const product = await getProduct(req.params.id);
       const coversUrls = await getCover(req.params.id);
       const measurementsUrls = await getMeasurements(req.params.id);
+
       res.send({
         error: null,
         data: { product: mapProduct(product), coversUrls, measurementsUrls },
@@ -110,10 +113,12 @@ router.post(
         color: req.body.color,
         price: req.body.price,
         sizes: req.body.sizes,
-        author: req.user._id,
+        author: {
+          connect: { id: req.user.id },
+        },
       });
 
-      await addProductLog(req.user._id, newProduct._id, req.body.article);
+      await addProductLog(req.user.id, newProduct.id, req.body.article);
 
       res.send({ data: newProduct });
     } catch (err) {
@@ -132,7 +137,7 @@ router.delete(
 
       await deleteProduct(req.params.id);
 
-      await deleteProductLog(req.user._id, req.params.id, product.article);
+      await deleteProductLog(req.user.id, req.params.id, product.article);
 
       res.send({ error: null, data: "Product was deleted" });
     } catch (err) {
@@ -161,7 +166,7 @@ router.patch(
 
       if (checkProductChanges(oldProduct, updatedProduct)) {
         await changeProductInfoLog(
-          req.user._id,
+          req.user.id,
           req.params.id,
           oldProduct,
           updatedProduct
@@ -192,7 +197,7 @@ router.post(
       });
 
       await addProductPhotosLog(
-        req.user._id,
+        req.user.id,
         req.body.folder,
         product.article,
         req.body.typePhotos,
@@ -223,7 +228,7 @@ router.post(
 
       if (req.body.sizeName) {
         await removeProductPhotosLog(
-          req.user._id,
+          req.user.id,
           req.body.id,
           product.article,
           req.body.typeOfPhoto,
@@ -231,7 +236,7 @@ router.post(
         );
       } else {
         await removeProductPhotosLog(
-          req.user._id,
+          req.user.id,
           req.body.id,
           product.article,
           req.body.typeOfPhoto

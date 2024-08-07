@@ -6,7 +6,6 @@ const initialState = {
 	id: null,
 	login: null,
 	roleId: ROLE.GUEST,
-	session: null,
 }
 
 const UserSlice = createSlice({
@@ -17,13 +16,11 @@ const UserSlice = createSlice({
 			state.id = action.payload.id;
 			state.login = action.payload.login;
 			state.roleId = action.payload.roleId;
-			state.session = action.payload.session;
 		},
 		logout(state) {
 			state.id = initialState.id;
 			state.login = initialState.login;
 			state.roleId = initialState.roleId;
-			state.session = initialState.session;
 		}
     },
     extraReducers: (builder) => {

@@ -36,7 +36,7 @@ export const ProductEdit = () => {
 	useEffect(() => {
 		request(`/products/${params.id}`).then(({ error, errorPath, data }) => {
 			if (error) {
-				dispatch(setError(errorPath === '_id' ? 'Продукт не найден' : error));
+				dispatch(setError(errorPath === 'id' ? 'Продукт не найден' : error));
 				dispatch(closeLoader());
 			} else {
 				setProduct(data.product);

@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { Order, OrderInfoExchangeType, ReactSelectOptionType, SaleProduct, UpdateOrderInfo, UpdatedProduct } from '../../interfaces';
-import { formatDateFromDb, getProductsFromOrder, removeSizes, request } from '../../utils';
+import { formatDateFromDb, getIsoDateNow, getProductsFromOrder, removeSizes, request } from '../../utils';
 import { useEffect, useState } from 'react';
 import { ACCESS, OFFLINE_DEAL, EMPTY_PRODUCT_FOR_ORDER } from '../../constants';
 import { useParams } from 'react-router-dom';
@@ -16,14 +16,15 @@ export const OneSale = () => {
 	const [order, setOrder] = useState<Order>();
 	const [products, setProducts] = useState<UpdatedProduct[]>([]);
 	const [initialProducts, setInitialProducts] = useState<UpdatedProduct[]>([]);
+	const [isSetInitialProducts, setIsSetInitialProducts] = useState<boolean>(false);
 	const [articles, setArticles] = useState<ReactSelectOptionType[]>([{ value: '', label: '' }]);
 	const [selectedProduct, setSelectedProduct] = useState<SingleValue<string>>('');
 	const [newOrderInfo, setNewOrderInfo] = useState<UpdateOrderInfo>({
-		name: order ? order?.name : '',
-		address: order ? order?.address : '',
-		deliveryType: order ? order?.deliveryType : '',
-		deliveryPrice: order ? order?.deliveryPrice : '',
-		phone: order ? order?.phone : '',
+		name: '',
+		address: '',
+		deliveryType: '',
+		deliveryPrice: '',
+		phone: '',
 	});
 	const [isExchangeProducts, setIsExchangeProducts] = useState<boolean>(false);
 	const [isNewOrderInfo, setIsNewOrderInfo] = useState<boolean>(false);
@@ -42,18 +43,20 @@ export const OneSale = () => {
 				console.log('ERROR', error);
 			} else {
 				setOrder(data);
-				setNewOrderInfo({
-					name: data.name,
-					address: data.address,
-					deliveryType: data.deliveryType,
-					deliveryPrice: data.deliveryPrice,
-					phone: data.phone,
-				});
+				newOrderInfo.name === '' &&
+					setNewOrderInfo({
+						name: data.name,
+						address: data.address,
+						deliveryType: data.deliveryType,
+						deliveryPrice: data.deliveryPrice,
+						phone: data.phone,
+					});
 
 				const arrOfProducts = data.product[data.product.length - 1];
 
 				if (arrOfProducts[0].productId === null && !isExchangeProducts) {
 					setIsCancelledDeal(true);
+
 					getProductsFromOrder(data.product[data.product.length - 2]).then(({ error, data }) => {
 						if (error) {
 							console.log('ERROR', error);
@@ -63,16 +66,18 @@ export const OneSale = () => {
 						}
 					});
 				} else {
-					products.length === 0 &&
+					if (products.length === 0 || isSetInitialProducts) {
 						getProductsFromOrder(arrOfProducts).then(({ error, data }) => {
 							if (error) {
 								console.log('ERROR', error);
 							} else if (data) {
 								setInitialProducts(data);
 								setProducts(data);
+								setIsSetInitialProducts(false);
 								dispatch(closeLoader());
 							}
 						});
+					}
 				}
 			}
 		});
@@ -86,7 +91,13 @@ export const OneSale = () => {
 
 						await Promise.all(deletedProducts.map((product) => request(`/products/${product.id}`, 'PATCH', { sizes: [...product.sizes, product.size] })));
 
-						await request(`/orders/${order?.id}`, 'PATCH', { ...order, isExchange: true, totalPrice: '0', orders: [EMPTY_PRODUCT_FOR_ORDER] });
+						await request(`/orders/${order?.id}`, 'PATCH', {
+							...order,
+							isExchange: true,
+							totalPrice: '0',
+							orders: [EMPTY_PRODUCT_FOR_ORDER],
+							updatedAt: getIsoDateNow(),
+						});
 						setExchangeType('none');
 						dispatch(closeModal());
 					},
@@ -122,6 +133,7 @@ export const OneSale = () => {
 								product: product.id,
 								size: product.size,
 								price: product.price,
+								createdAt: getIsoDateNow(),
 							}));
 
 						let totalPrice = 0;
@@ -136,13 +148,21 @@ export const OneSale = () => {
 
 						const deletedProducts = initialProducts.filter(({ id }) => deletedProductsId.includes(id)).filter(({ size, sizes }) => !sizes.includes(size));
 
-						await request(`/orders/${order?.id}`, 'PATCH', { ...order, isExchange: true, totalPrice: totalPrice.toString(), orders: ProductsForOrder });
+						await request(`/orders/${order?.id}`, 'PATCH', {
+							...order,
+							isExchange: true,
+							totalPrice: totalPrice.toString(),
+							orders: ProductsForOrder,
+							updatedAt: getIsoDateNow(),
+						});
+
 						await Promise.all(deletedProducts.map((product) => request(`/products/${product.id}`, 'PATCH', { sizes: [...product.sizes, product.size] })));
 						await removeSizes(products);
 						setProducts(products.filter(({ size }) => !!size));
 						setExchangeType('none');
 						setIsExchangeProducts(false);
 						setIsNewOrderInfo(false);
+						setIsSetInitialProducts(true);
 						dispatch(closeModal());
 					},
 					onCancel: () => {
@@ -243,19 +263,19 @@ export const OneSale = () => {
 									{!isOfflineSale && (
 										<>
 											<p>
-												Заказчик: <span>{order?.name}</span>
+												Заказчик: <span>{newOrderInfo.name}</span>
 											</p>
 											<p>
-												Телефон: <span>{order?.phone}</span>
+												Телефон: <span>{newOrderInfo.phone}</span>
 											</p>
 											<p>
-												Адрес доставки: <span>{order?.address}</span>
+												Адрес доставки: <span>{newOrderInfo.address}</span>
 											</p>
 											<p>
-												Служба доставки: <span>{order?.deliveryType}</span>
+												Служба доставки: <span>{newOrderInfo.deliveryType}</span>
 											</p>
 											<p>
-												Стоимость доставки: <span>{order?.deliveryPrice}</span>
+												Стоимость доставки: <span>{newOrderInfo.deliveryPrice}</span>
 											</p>
 										</>
 									)}
@@ -315,7 +335,14 @@ export const OneSale = () => {
 								) : (
 									<div className="empty-block" />
 								)}
-								<ProductsInfo products={products} orderProducts={order?.product[order.product.length - 1] as SaleProduct[]} />
+								<ProductsInfo
+									products={products}
+									orderProducts={
+										order?.product[order.product.length - 1][0].productId === null
+											? order?.product[order.product.length - 2]
+											: (order?.product[order.product.length - 1] as SaleProduct[])
+									}
+								/>
 							</div>
 						) : (
 							<OneSaleExchangeProducts

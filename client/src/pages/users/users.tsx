@@ -41,15 +41,6 @@ export const Users = () => {
 					isSwitcher={false}
 					isSearch={false}
 				/>
-				{/* <div className="table-header">
-						<div className="table-title">Логин:</div>
-						<div className="table-title">Телефон:</div>
-						<div className="table-title">Дата регистрации:</div>
-						<div className="table-title">Должность:</div>
-					</div>
-					{users.map((user) => (
-						<UserRow key={user.login} id={user.id} login={user.login} phone={user.phone} registeredAt={user.registeredAt} roleId={user.roleId} />
-					))} */}
 			</UsersContainer>
 		</PrivateContent>
 	);

@@ -1,33 +1,28 @@
-const mongoose = require("mongoose");
-const Order = require("../models/Order");
+const { prisma } = require("../prisma-service");
 
-async function addOrder(order) {
-  const newOrder = await Order.create(order);
-
-  return newOrder;
+function addOrder(order) {
+  return prisma.order.create({ data: order });
 }
 
 async function getOrders(search = "", limit = 10, page = 1) {
+  const where = {
+    OR: [
+      { name: { contains: search, mode: "insensitive" } },
+      { phone: { contains: search, mode: "insensitive" } },
+      { address: { contains: search, mode: "insensitive" } },
+      { deliveryType: { contains: search, mode: "insensitive" } },
+      { totalPrice: { contains: search, mode: "insensitive" } },
+    ],
+  };
+
   const [orders, countOrders] = await Promise.all([
-    Order.find({
-      $or: [
-        { name: { $regex: search, $options: "i" } },
-        { phone: { $regex: search, $options: "i" } },
-        { address: { $regex: search, $options: "i" } },
-        { deliveryType: { $regex: search, $options: "i" } },
-        { totalPrice: { $regex: search, $options: "i" } },
-      ],
-    })
-      .limit(limit)
-      .skip(limit * (page - 1))
-      .sort({ createdAt: -1 }),
-    Order.countDocuments(
-      { name: { $regex: search, $options: "i" } } || {
-          phone: { $regex: search, $options: "i" },
-        } || { address: { $regex: search, $options: "i" } } || {
-          deliveryType: { $regex: search, $options: "i" },
-        } || { totalPrice: { $regex: search, $options: "i" } }
-    ),
+    prisma.order.findMany({
+      where,
+      take: Number(limit),
+      skip: limit * (page - 1),
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.order.count({ where }),
   ]);
 
   return {
@@ -37,23 +32,23 @@ async function getOrders(search = "", limit = 10, page = 1) {
 }
 
 async function getOrdersWithExchange(search = "", limit = 10, page = 1) {
-  const searchConditions = [
-    { authorName: { $regex: search, $options: "i" } },
-    { totalPrice: { $regex: search, $options: "i" } },
-  ];
+  const where = {
+    isExchange: true,
+    OR: [
+      // { authorName: { contains: search, mode: "insensitive" } },
+      // { orders: { contains: search, mode: "insensitive" } },
+      { totalPrice: { contains: search, mode: "insensitive" } },
+    ],
+  };
 
   const [orders, countOrders] = await Promise.all([
-    Order.find({
-      isExchange: true,
-      $or: searchConditions,
-    })
-      .limit(limit)
-      .skip(limit * (page - 1))
-      .sort({ createdAt: -1 }),
-    Order.countDocuments({
-      isExchange: true,
-      $or: searchConditions,
+    prisma.order.findMany({
+      where,
+      take: Number(limit),
+      skip: limit * (page - 1),
+      orderBy: { createdAt: "desc" },
     }),
+    prisma.order.count({ where }),
   ]);
 
   return {
@@ -63,75 +58,112 @@ async function getOrdersWithExchange(search = "", limit = 10, page = 1) {
 }
 
 function getOrder(id) {
-  return Order.findById(id);
+  return prisma.order.findUnique({
+    where: {
+      id: Number(id),
+    },
+  });
 }
 
-function getOrdersByDate(startDate, endDate) {
-  return Order.find({
-    createdAt: {
-      $gte: new Date(startDate),
-      $lte: new Date(endDate),
+async function getOrdersByDate(startDate, endDate) {
+  return prisma.order.findMany({
+    where: {
+      updatedAt: {
+        gte: new Date(startDate),
+        lte: new Date(endDate),
+      },
     },
   });
 }
 
 async function editOrder(id, order, newProduct) {
-  if (newProduct) {
-    try {
-      updatedOrder = await Order.findByIdAndUpdate(
-        id,
-        {
+  try {
+    if (newProduct[0]) {
+      // Получаем текущий заказ
+      const existingOrder = await getOrder(id);
+
+      const orderProducts = existingOrder.orders.set
+        ? existingOrder.orders.set
+        : existingOrder.orders;
+
+      // Обновляем заказ и добавляем новый продукт в массив
+      const updatedOrder = await prisma.order.update({
+        where: { id: Number(id) },
+        data: {
           ...order,
-          $push: {
-            orders: { $each: [newProduct] },
+          orders: {
+            set: orderProducts.concat(newProduct),
           },
         },
-        {
-          new: true,
-        }
-      );
+      });
+
       return updatedOrder;
-    } catch (error) {
-      console.log("ERR", error);
-    }
-  } else {
-    try {
-      updatedOrder = await Order.findByIdAndUpdate(
-        id,
-        { ...order },
-        { new: true }
-      );
+    } else {
+      // Обновляем заказ без добавления нового продукта
+      const updatedOrder = await prisma.order.update({
+        where: { id: Number(id) },
+        data: {
+          ...order,
+        },
+      });
+
       return updatedOrder;
-    } catch (error) {
-      console.log("ERR", error);
     }
+  } catch (error) {
+    throw error;
   }
 }
 
 function deleteOrder(id) {
-  return Order.deleteOne({ _id: id });
+  return prisma.order.delete({
+    where: { id: Number(id) },
+  });
 }
 
 async function isProductUsedEarly(productId) {
   const sixtyDaysAgo = new Date();
   sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
-  const orders = await Order.aggregate([
-    // Фильтруем документы, которые были обновлены в течение последних 60 дней
-    { $match: { updatedAt: { $gte: sixtyDaysAgo } } },
-    // Проецируем только те поля, которые нам нужны
-    { $project: { orders: 1 } },
-    // Добавляем поле, содержащее последний элемент массива orders
-    { $addFields: { lastOrder: { $arrayElemAt: ["$orders", -1] } } },
-    // Разворачиваем массив lastOrder для дальнейшей фильтрации
-    { $unwind: "$lastOrder" },
-    // Фильтруем документы, содержащие указанный productId
-    { $match: { "lastOrder.product": new mongoose.Types.ObjectId(productId) } },
-    // Возвращаем только поле _id (или любое другое, если нужно)
-    { $project: { _id: 1 } },
-  ]);
+  // Получаем все заказы, обновленные в течение последних 60 дней
+  const orders = await prisma.order.findMany({
+    where: {
+      updatedAt: {
+        gte: sixtyDaysAgo.toISOString(),
+      },
+    },
+    select: {
+      id: true,
+      orders: true,
+    },
+  });
 
-  return orders.length > 0;
+  // Проверяем только последний массив в orders
+  for (const order of orders) {
+    let orderProducts = order.orders;
+
+    // Проверяем, если ли у объекта orders ключ "set" и извлекаем массив, если он есть
+    if (
+      orderProducts &&
+      typeof orderProducts === "object" &&
+      "set" in orderProducts
+    ) {
+      orderProducts = orderProducts.set;
+    }
+
+    // Если orders представляет собой массив массивов, проверяем последний массив
+    if (Array.isArray(orderProducts) && orderProducts.length > 0) {
+      const lastProductGroup = orderProducts[orderProducts.length - 1]; // Последний массив
+
+      // Проверяем продукты в последнем массиве
+      for (const product of lastProductGroup) {
+        if (Number(product.product) === Number(productId)) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
 }
 
 module.exports = {

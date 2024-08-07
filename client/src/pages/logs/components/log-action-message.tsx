@@ -59,8 +59,8 @@ export const LogActionMessage = ({ log }: { log: ActionLog }) => {
 		}, '');
 	};
 
-	const productsOldArticles = log.order?.productsOld?.map(({ article }) => article);
-	const productsNewArticles = log.order?.productsNew?.map(({ article }) => article);
+	const productsOldArticles = log.order?.productsOld && log.order?.productsOld?.map((product) => (product ? product.article : 'no'));
+	const productsNewArticles = log.order?.productsNew && log.order?.productsNew?.map((product) => (product ? product.article : 'no'));
 
 	if (log.action === LOG_ACTIONS.PRODUCT_ACTIONS.UPDATE_INFO) {
 		if (log.product?.brandOld !== log.product?.brandNew) {
@@ -107,12 +107,16 @@ export const LogActionMessage = ({ log }: { log: ActionLog }) => {
 
 	const ProductArticles = ({ products }: { products: productsInOrdersLogs[] }) => (
 		<>
-			{products.map(({ id, article }, index) => (
-				<React.Fragment key={id}>
-					<Link to={`/catalog/${id}`}>{article}</Link>
-					{index !== products.length - 1 && <>, </>}
-				</React.Fragment>
-			))}
+			{products.map((product, index) =>
+				product ? (
+					<React.Fragment key={index}>
+						<Link to={`/catalog/${product.id}`}>{product.article}</Link>
+						{index !== products.length - 1 && <>, </>}
+					</React.Fragment>
+				) : (
+					'удаленный товар, '
+				),
+			)}
 		</>
 	);
 
@@ -120,80 +124,94 @@ export const LogActionMessage = ({ log }: { log: ActionLog }) => {
 		case LOG_ACTIONS.PRODUCT_ACTIONS.ADD:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span>  добавила новый товар - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>, 
+					<div className="main-content">
+						<span className="author-name">{log.author}</span>  добавила новый товар - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>, 
+					</div>
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.PRODUCT_ACTIONS.UPDATE_INFO:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span>  изменила {productChanges?.key} у товара - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link> c 
-					<span className="log-info">{productChanges?.ValueOld}</span> на <span className="log-info">{productChanges?.ValueNew}</span>, 
+					<div className="main-content">
+						<span className="author-name">{log.author}</span>  изменила {productChanges?.key} у товара - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link> c 
+						<span className="log-info">{productChanges?.ValueOld}</span> на <span className="log-info">{productChanges?.ValueNew}</span>, 
+					</div>
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.PRODUCT_ACTIONS.ADD_PHOTOS:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span>  добавила товару - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>
-					{log.product?.isChangedMeasurements ? ` замеров к ${log.product.changedMeasurementsSize} размеру` : ` обложек`}, 
+					<div className="main-content">
+						<span className="author-name">{log.author}</span>  добавила товару - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>
+						{log.product?.isChangedMeasurements ? ` замеров к ${log.product.changedMeasurementsSize} размеру` : ` обложек`}, 
+					</div>
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.PRODUCT_ACTIONS.REMOVE_PHOTOS:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span>  удалила у товара - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>
-					{log.product?.isChangedMeasurements ? ` замеры к ${log.product.changedMeasurementsSize} размеру` : ` обложки`}, 
+					<div className="main-content">
+						<span className="author-name">{log.author}</span>  удалила у товара - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>
+						{log.product?.isChangedMeasurements ? ` замеры к ${log.product.changedMeasurementsSize} размеру` : ` обложки`}, 
+					</div>
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.PRODUCT_ACTIONS.REMOVE:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span>  удалила товар - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>, 
+					<div className="main-content">
+						<span className="author-name">{log.author}</span>  удалила товар - <Link to={`/catalog/${log.product?.id}`}>{log.product?.article}</Link>, 
+					</div>
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.ORDER_ACTIONS.ADD:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span> создала <Link to={`/order/${log.order?.id}`}>ЗАКАЗ</Link>, 
+					<div className="main-content">
+						<span className="author-name">{log.author}</span> создала <Link to={`/sales/${log.order?.id}`}>ЗАКАЗ</Link>, 
+					</div>
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.ORDER_ACTIONS.UPDATE:
 			return (
 				<RawContainer>
-					<div>
-						<span className="author-name">{log.author}</span> в этой 
-						<span className="bold">
-							<Link to={`/order/${log.order?.id}`}>ПРОДАЖЕ</Link>
-						</span>
-						 изменила 
-					</div>
-					<div className="change-container">
-						{orderChanges.map((orderPoint, index) => {
-							return (
-								<div className="order-points" key={index}>
-									{orderPoint.key} c 
-									{checkProductsInOrder() ? (
-										<>
-											<ProductArticles products={log.order?.productsOld as productsInOrdersLogs[]} /> 
-										</>
-									) : (
-										<span className="log-info">{orderPoint.ValueOld} </span>
-									)}
-									на 
-									{checkProductsInOrder() ? (
-										<ProductArticles products={log.order?.productsNew as productsInOrdersLogs[]} />
-									) : (
-										<span className="log-info">{orderPoint?.ValueNew}</span>
-									)}
-									{index !== orderChanges.length - 1 ? <> и </> : <>, </>}
-								</div>
-							);
-						})}
+					<div className="main-content">
+						<div>
+							<span className="author-name">{log.author}</span> в этой 
+							<span className="bold">
+								<Link to={`/sales/${log.order?.id}`}>ПРОДАЖЕ</Link>
+							</span>
+							 изменила 
+						</div>
+						<div className="change-container">
+							{orderChanges.map((orderPoint, index) => {
+								return (
+									<div className="order-points" key={index}>
+										{orderPoint.key} c 
+										{checkProductsInOrder() ? (
+											<>
+												<ProductArticles products={log.order?.productsOld as productsInOrdersLogs[]} /> 
+											</>
+										) : (
+											<span className="log-info">{orderPoint.ValueOld} </span>
+										)}
+										на 
+										{checkProductsInOrder() ? (
+											<ProductArticles products={log.order?.productsNew as productsInOrdersLogs[]} />
+										) : (
+											<span className="log-info">{orderPoint?.ValueNew}</span>
+										)}
+										{index !== orderChanges.length - 1 ? <> и </> : <>, </>}
+									</div>
+								);
+							})}
+						</div>
 					</div>
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
@@ -201,38 +219,58 @@ export const LogActionMessage = ({ log }: { log: ActionLog }) => {
 		case LOG_ACTIONS.ORDER_ACTIONS.CANCEL:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span> отменила <Link to={`/order/${log.order?.id}`}>ЗАКАЗ</Link>, 
+					<div className="main-content">
+						<span className="author-name">{log.author}</span> отменила <Link to={`/sales/${log.order?.id}`}>ЗАКАЗ</Link>, 
+					</div>
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.ORDER_ACTIONS.CANCEL_CANCELLATION:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span> вернула <Link to={`/order/${log.order?.id}`}>ЗАКАЗ</Link>, 
+					<div className="main-content">
+						<span className="author-name">{log.author}</span> вернула <Link to={`/sales/${log.order?.id}`}>ЗАКАЗ</Link>, 
+					</div>
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		case LOG_ACTIONS.USER_ACTIONS.UPDATE_ROLE:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span> изменила роль пользователя - <span className="author-name">{log.user?.id}</span> c 
-					<span className="log-info">{roleName(log.user?.roleOld as string)}</span> на <span className="log-info">{roleName(log.user?.roleNew as string)}</span>, 
+					<div className="main-content">
+						<span className="author-name">{log.author}</span> изменила роль пользователя - <span className="author-name">{log.user?.name}</span> c 
+						<span className="log-info">{roleName(log.user?.roleOld as string)}</span> на <span className="log-info">{roleName(log.user?.roleNew as string)}</span>, 
+					</div>
+					<div className="date">{formatDateFromDb(log.createdAt)}</div>
+				</RawContainer>
+			);
+		case LOG_ACTIONS.USER_ACTIONS.DELETE:
+			return (
+				<RawContainer>
+					<div className="main-content">
+						<span className="author-name">{log.author}</span> удалила пользователя - <span className="author-name">{log.user?.name}</span>, 
+					</div>
 					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 		default:
 			return (
 				<RawContainer>
-					<span className="author-name">{log.author}</span>  неизвестная операция, <div className="date">{formatDateFromDb(log.createdAt)}</div>
+					<div className="main-content">
+						<span className="author-name">{log.author}</span>  неизвестная операция, 
+					</div>
+					<div className="date">{formatDateFromDb(log.createdAt)}</div>
 				</RawContainer>
 			);
 	}
 };
 
 const RawContainer = styled.div`
-	// font-weight: 500;
+	// background-color: #bb0;
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
+	width: 100%;
 
 	& a {
 		color: #000;
@@ -242,6 +280,11 @@ const RawContainer = styled.div`
 		color: #b00;
 		text-decoration: none;
 		transition: 0.3s;
+	}
+
+	& .main-content {
+		display: flex;
+		align-items: center;
 	}
 
 	& .author-name {
@@ -270,6 +313,7 @@ const RawContainer = styled.div`
 		margin: 7px 0 5px;
 		// padding: 0 10px;
 	}
+
 	& .order-points {
 		// background-color: #0b0;
 		width: 100%;

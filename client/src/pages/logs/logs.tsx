@@ -1,10 +1,14 @@
 import styled from 'styled-components';
-import { Table } from '../../components';
+import { Loader, PrivateContent, Table } from '../../components';
 import { useEffect, useState } from 'react';
 import { request } from '../../utils';
 import { ActionLog } from '../../interfaces';
 import { LogsRow } from './components';
-import { LOG_ACTIONS } from '../../constants';
+import { ACCESS, LOG_ACTIONS } from '../../constants';
+import { useSelector } from 'react-redux';
+import { selectApp } from '../../redux/selectors';
+import { useAppDispatch } from '../../redux/store';
+import { closeLoader } from '../../redux/reducers';
 
 export const Logs = () => {
 	const [logsByOrders, setLogsByOrders] = useState<ActionLog[]>([]);
@@ -13,10 +17,14 @@ export const Logs = () => {
 	const [switcherPosition, setSwitcherPosition] = useState(0);
 	const switcherNames = ['Продажи', 'Товары', 'Пользователи'];
 
+	const loader = useSelector(selectApp).loader;
+	const dispatch = useAppDispatch();
+
 	useEffect(() => {
 		request(`/logs`).then(({ error, data }) => {
 			if (error) {
 				console.log(error);
+				dispatch(closeLoader());
 			} else {
 				let orderLogs: ActionLog[] = [];
 				let productLogs: ActionLog[] = [];
@@ -34,25 +42,30 @@ export const Logs = () => {
 				setLogsByOrders(orderLogs);
 				setLogsByProducts(productLogs);
 				setLogsByUsers(userLogs);
+				dispatch(closeLoader());
 			}
 		});
-	}, []);
+	}, [dispatch]);
 
-	return (
-		<LogsContainer>
-			<Table
-				headers={['Журнал действий']}
-				$headerFontSize="18px"
-				tablePoints={[
-					logsByOrders.map((log, index) => <LogsRow key={index} log={log} />),
-					logsByProducts.map((log, index) => <LogsRow key={index} log={log} />),
-					logsByUsers.map((log, index) => <LogsRow key={index} log={log} />),
-				]}
-				isSwitcher={true}
-				isSearch={false}
-				switcherArgs={{ position: switcherPosition, setPosition: setSwitcherPosition, positionNames: switcherNames }}
-			/>
-		</LogsContainer>
+	return loader ? (
+		<Loader />
+	) : (
+		<PrivateContent access={ACCESS.EDIT_SCHEDULES}>
+			<LogsContainer>
+				<Table
+					headers={['Журнал действий']}
+					$headerFontSize="18px"
+					tablePoints={[
+						logsByOrders.map((log, index) => <LogsRow key={index} log={log} />),
+						logsByProducts.map((log, index) => <LogsRow key={index} log={log} />),
+						logsByUsers.map((log, index) => <LogsRow key={index} log={log} />),
+					]}
+					isSwitcher={true}
+					isSearch={false}
+					switcherArgs={{ position: switcherPosition, setPosition: setSwitcherPosition, positionNames: switcherNames }}
+				/>
+			</LogsContainer>
+		</PrivateContent>
 	);
 };
 

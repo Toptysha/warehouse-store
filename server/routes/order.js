@@ -32,12 +32,15 @@ router.get(
         req.query.limit,
         req.query.page
       );
+
       const ordersWithAuthorName = await getUserNameForOrders(
         orders.map(mapOrder)
       );
+
       const ordersWithProductArticles = await getProductArticlesForOrders(
         ordersWithAuthorName
       );
+
       res.send({
         data: { orders: ordersWithProductArticles, lastPage },
       });
@@ -82,8 +85,8 @@ router.get(
   async (req, res) => {
     try {
       const order = await getOrder(req.params.id);
-      const author = await getUser(order.author);
-      res.send({ data: mapOrder(order, author) });
+      const author = await getUser(order.authorId);
+      res.send({ data: mapOrder({ ...order, authorName: author.login }) });
     } catch (err) {
       res.send({ error: err.message || "Unknown Error", errorPath: err.path });
     }
@@ -125,10 +128,12 @@ router.post(
         isExchange: req.body.isExchange,
         orders: req.body.orders,
         totalPrice: req.body.totalPrice,
-        author: req.user._id,
+        author: {
+          connect: { id: req.user.id },
+        },
       });
 
-      await addOrderLog(req.user._id, newOrder._id);
+      await addOrderLog(req.user.id, newOrder.id);
 
       res.send({ data: newOrder });
     } catch (err) {
@@ -155,14 +160,15 @@ router.patch(
           deliveryType: req.body.deliveryType,
           deliveryPrice: req.body.deliveryPrice,
           phone: req.body.phone,
+          updatedAt: req.body.updatedAt,
         },
-        req.body.orders
+        [req.body.orders]
       );
 
       if (checkOrderChanges(oldOrder, updatedOrder)) {
         await changeOrderInfoLog(
-          req.user._id,
-          req.params.id,
+          req.user.id,
+          Number(req.params.id),
           oldOrder,
           updatedOrder
         );

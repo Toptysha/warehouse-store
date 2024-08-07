@@ -15,9 +15,9 @@ module.exports = function (log, users, products) {
   };
 
   return {
-    author: userDict[log.author] || "Unknown",
+    author: userDict[log.authorId.toString()] || "Unknown",
     action: log.action,
-    product: {
+    product: log.product && {
       id: log.product.id,
       isChangedCovers: log.product.isChangedCovers,
       isChangedMeasurements: log.product.isChangedMeasurements,
@@ -34,23 +34,26 @@ module.exports = function (log, users, products) {
       priceNew: log.product.priceNew,
       sizesNew: log.product.sizesNew,
     },
-    order: {
+    order: log.order && {
       id: log.order.id,
       nameOld: log.order.nameOld,
       phoneOld: log.order.phoneOld,
       addressOld: log.order.addressOld,
       deliveryTypeOld: log.order.deliveryTypeOld,
       deliveryPriceOld: log.order.deliveryPriceOld,
-      productsOld: log.order.productsOld.map(getProductDetails),
+      productsOld:
+        log.order.productsOld && log.order.productsOld.map(getProductDetails),
       nameNew: log.order.nameNew,
       phoneNew: log.order.phoneNew,
       addressNew: log.order.addressNew,
       deliveryTypeNew: log.order.deliveryTypeNew,
       deliveryPriceNew: log.order.deliveryPriceNew,
-      productsNew: log.order.productsNew.map(getProductDetails),
+      productsNew:
+        log.order.productsNew && log.order.productsNew.map(getProductDetails),
     },
-    user: {
+    user: log.user && {
       id: userDict[log.user.id] || "Unknown",
+      name: log.user.name || "Unknown",
       roleOld: log.user.roleOld,
       roleNew: log.user.roleNew,
     },

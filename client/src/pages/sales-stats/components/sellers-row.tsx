@@ -1,16 +1,48 @@
 import styled from 'styled-components';
 import { SellerStats } from '../../../interfaces';
 
-export const SellersRow = ({ seller }: { seller: SellerStats }) => {
-	return Number(seller.lastMonthProductsAmount) !== 0 || Number(seller.currentMonthProductsAmount) !== 0 ? (
+export const SellersRow = ({ seller, sellType }: { seller: SellerStats; sellType: 'all' | 'online' | 'offline' }) => {
+	return seller.offlineWageInCurrentMonth !== 0 || seller.offlineWageInLastMonth !== 0 || seller.onlineWageInCurrentMonth !== 0 || seller.onlineWageInLastMonth !== 0 ? (
 		<SellersRowContainer>
-			<div className="infoPoint">{seller.seller}</div>
-			<div className="infoPoint">{seller.currentMonthRevenueAmount}</div>
-			<div className="infoPoint">{seller.lastMonthRevenueAmount}</div>
-			<div className="infoPoint">{seller.currentMonthProductsAmount}</div>
-			<div className="infoPoint">{seller.lastMonthProductsAmount}</div>
-			<div className="infoPoint">{seller.currentMonthWage}</div>
-			<div className="infoPoint">{seller.lastMonthWage}</div>
+			<div className="infoPoint">{seller.sellerName}</div>
+			<div className="infoPoint">
+				{sellType === 'all'
+					? seller.totalOfflinePriceInCurrentMonth + seller.totalOnlinePriceInCurrentMonth
+					: sellType === 'online'
+						? seller.totalOnlinePriceInCurrentMonth
+						: seller.totalOfflinePriceInCurrentMonth}
+			</div>
+			<div className="infoPoint">
+				{sellType === 'all'
+					? seller.totalOfflinePriceInLastMonth + seller.totalOnlinePriceInLastMonth
+					: sellType === 'online'
+						? seller.totalOnlinePriceInLastMonth
+						: seller.totalOfflinePriceInLastMonth}
+			</div>
+			<div className="infoPoint">
+				{sellType === 'all'
+					? seller.totalOfflineProductsInCurrentMonth + seller.totalOnlineProductsInCurrentMonth
+					: sellType === 'online'
+						? seller.totalOnlineProductsInCurrentMonth
+						: seller.totalOfflineProductsInCurrentMonth}
+			</div>
+			<div className="infoPoint">
+				{sellType === 'all'
+					? seller.totalOfflineProductsInLastMonth + seller.totalOnlineProductsInLastMonth
+					: sellType === 'online'
+						? seller.totalOnlineProductsInLastMonth
+						: seller.totalOfflineProductsInLastMonth}
+			</div>
+			<div className="infoPoint">
+				{sellType === 'all'
+					? seller.offlineWageInCurrentMonth + seller.onlineWageInCurrentMonth
+					: sellType === 'online'
+						? seller.onlineWageInCurrentMonth
+						: seller.offlineWageInCurrentMonth}
+			</div>
+			<div className="infoPoint">
+				{sellType === 'all' ? seller.offlineWageInLastMonth + seller.onlineWageInLastMonth : sellType === 'online' ? seller.onlineWageInLastMonth : seller.offlineWageInLastMonth}
+			</div>
 		</SellersRowContainer>
 	) : null;
 };

@@ -3,5 +3,6 @@ export interface User {
 	login: string,
 	phone: string,
 	roleId: string,
+	color?: string,
 	registeredAt: string,
 }

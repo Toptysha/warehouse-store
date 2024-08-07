@@ -52,7 +52,7 @@ export const Order = ({ orderType }: { orderType: 'online' | 'offline' }) => {
 			return;
 		}
 
-		let totalPrice = Number(deliveryPrice);
+		let totalPrice = 0;
 
 		products.forEach(({ price }) => {
 			totalPrice += Number(price);
@@ -65,10 +65,9 @@ export const Order = ({ orderType }: { orderType: 'online' | 'offline' }) => {
 					product: id,
 					size,
 					price,
+					createdAt: new Date().toISOString(),
 				};
 			});
-
-		console.log('TEST00', orders);
 
 		const phoneFormat = orderType === 'online' ? phone.replaceAll(' ', '').replaceAll('-', '').replaceAll('(', '').replaceAll(')', '') : 'offline';
 

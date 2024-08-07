@@ -3,7 +3,7 @@ import { selectUser } from '../../redux/selectors';
 import { useAppDispatch } from '../../redux/store';
 import { logout, openLoader } from '../../redux/reducers';
 import { useNavigate } from 'react-router-dom';
-import { COLORS, ROLE } from '../../constants';
+import { ACCESS, COLORS, ROLE } from '../../constants';
 import hangerLogo from '../../images/hanger-logo.png';
 import beautyLogo from '../../images/beauty-logo.png';
 import arrowsDown from '../../images/arrows.png';
@@ -48,6 +48,12 @@ export const Header = () => {
 		navigate('/users');
 	};
 
+	const onSchedule = () => {
+		dispatch(openLoader());
+		setIsVisible(false);
+		navigate('/schedule');
+	};
+
 	const onLogs = () => {
 		dispatch(openLoader());
 		setIsVisible(false);
@@ -68,9 +74,10 @@ export const Header = () => {
 					</div>
 					{isVisible && (
 						<div className="name-menu" ref={divRef}>
-							<NameMenuPoint onClick={() => {}} description="Управление аккаунтом" />
-							<NameMenuPoint onClick={onUsers} description="Управление пользователями" />
-							<NameMenuPoint onClick={onLogs} description="Журнал действий" />
+							{/* <NameMenuPoint onClick={() => {}} description="Управление аккаунтом" /> */}
+							{ACCESS.USERS.includes(user.roleId as string) && <NameMenuPoint onClick={onUsers} description="Управление пользователями" />}
+							{ACCESS.EDIT_SCHEDULES.includes(user.roleId as string) && <NameMenuPoint onClick={onSchedule} description="График работы продавцов" />}
+							{ACCESS.LOGS.includes(user.roleId as string) && <NameMenuPoint onClick={onLogs} description="Журнал действий" />}
 							<NameMenuPoint onClick={onLogout} description="Выйти" />
 						</div>
 					)}

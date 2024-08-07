@@ -5,12 +5,15 @@ import { Button } from '../../../components';
 import { request } from '../../../utils';
 import { useSelector } from 'react-redux';
 import { selectUser } from '../../../redux/selectors';
+import { useAppDispatch } from '../../../redux/store';
+import { closeModal, openModal } from '../../../redux/reducers';
 
 export const UserRow = ({ id, login, phone, registeredAt, roleId }: { id: string; login: string; phone: string; registeredAt: string; roleId: string }) => {
 	const [initialRoleId, setInitialRoleId] = useState(roleId);
 	const [selectedRoleId, setSelectedRoleId] = useState(roleId);
 
 	const currentUser = useSelector(selectUser);
+	const dispatch = useAppDispatch();
 
 	const onSaveRole = () => {
 		request(`/users/${id}`, 'PATCH', { roleId: selectedRoleId }).then(({ error }) => {
@@ -22,9 +25,34 @@ export const UserRow = ({ id, login, phone, registeredAt, roleId }: { id: string
 		});
 	};
 
+	const onDeleteUser = () => {
+		dispatch(
+			openModal({
+				text: `Удалить пользователя ${login}?`,
+				onConfirm: () => {
+					request(`/users/${id}`, 'DELETE').then(({ error }) => {
+						if (error) {
+							console.log(error);
+							return;
+						}
+					});
+					dispatch(closeModal());
+				},
+				onCancel: () => dispatch(closeModal()),
+			}),
+		);
+	};
+
 	return (
 		<UserRowContainer>
-			<div className="infoPoint">{login}</div>
+			<div className="infoPoint">
+				{login}{' '}
+				{currentUser.id !== id && (
+					<div className="delete-user-button">
+						<Button description="🗑️" width="35px" onClick={onDeleteUser} />
+					</div>
+				)}
+			</div>
 			<div className="infoPoint">{phone}</div>
 			<div className="infoPoint">{registeredAt}</div>
 			<div className="infoPoint">
@@ -33,6 +61,7 @@ export const UserRow = ({ id, login, phone, registeredAt, roleId }: { id: string
 					onChange={(event) => {
 						setSelectedRoleId(event.target.value);
 					}}
+					disabled={Number(selectedRoleId) === Number(ROLE.ADMIN) && Number(currentUser.id) === Number(id)}
 				>
 					{Object.entries(ROLES_FOR_CLIENT).map((point) => {
 						return (
@@ -85,5 +114,11 @@ const UserRowContainer = styled.div`
 		position: absolute;
 		background: none;
 		border: none;
+	}
+
+	& .delete-user-button {
+		position: absolute;
+		top: -5px;
+		right: 260px;
 	}
 `;

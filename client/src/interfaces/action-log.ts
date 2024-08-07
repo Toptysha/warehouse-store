@@ -34,6 +34,7 @@ interface Order {
 
 interface User {
 	id: string,
+	name: string,
 	roleOld?: string,
 	roleNew?: string,
   }

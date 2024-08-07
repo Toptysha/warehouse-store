@@ -4,15 +4,20 @@ import { ACCESS } from '../../constants';
 import { useSelector } from 'react-redux';
 import { selectApp } from '../../redux/selectors';
 import { useEffect, useState } from 'react';
-import { UnionTotalStats } from '../../interfaces';
-import { request, totalStatsCount } from '../../utils';
+import { getDaysInMonth, request, totalSellersStatsCount, totalStatsCount } from '../../utils';
 import { useAppDispatch } from '../../redux/store';
 import { closeLoader } from '../../redux/reducers';
 import { SellersRow, TotalInfoBlock } from './components';
+import { SellerStats, TotalStats } from '../../interfaces';
 
 export const SalesStats = () => {
 	const [switcherPosition, setSwitcherPosition] = useState(0);
-	const [totalStatsAmount, setTotalStatsAmount] = useState<UnionTotalStats>();
+	const [sellersStatsAmount, setSellersStatsAmount] = useState<SellerStats[]>([]);
+	const [totalStatsAmount, setTotalStatsAmount] = useState<TotalStats>();
+
+	const today = new Date();
+	const currentMonth = today.getMonth();
+	const currentYear = today.getFullYear();
 
 	const switcherNames = ['Все продажи', 'Продажи онлайн', 'Продажи в магазине'];
 
@@ -47,15 +52,37 @@ export const SalesStats = () => {
 				const formattedDateNow = endDate.toISOString();
 				const formattedFirstDayOfLastMonth = firstDayOfLastMonth.toISOString();
 
+				const lastDate = {
+					year: currentMonth === 1 ? currentYear - 1 : currentYear,
+					month: currentMonth === 1 ? 12 : currentMonth - 1,
+				};
+
+				const daysInMonth = {
+					currentMonth: getDaysInMonth(currentYear, currentMonth).length,
+					lastMonth: getDaysInMonth(lastDate.year, lastDate.month).length,
+				};
+
 				const sellerStatsPromises = [
 					request(`/users/by_roles`, 'POST', { roleIds: ACCESS.MAKE_ORDER }),
 					request(`/orders/by_date`, 'POST', { startDate: formattedFirstDayOfCurrentMonth, endDate: formattedDateNow }),
 					request(`/orders/by_date`, 'POST', { startDate: formattedFirstDayOfLastMonth, endDate: formattedFirstDayOfCurrentMonth }),
+					request(`/schedule/find_by_month`, 'POST', { year: currentYear, month: currentMonth + 1 }),
+					request(`/schedule/find_by_month`, 'POST', { year: lastDate.year, month: lastDate.month + 1 }),
 				];
 
-				const [users, ordersByCurrentMonth, ordersByLastMonth] = await Promise.all(sellerStatsPromises);
+				const [users, ordersByCurrentMonth, ordersByLastMonth, scheduleByCurrentMonth, scheduleByLastMonth] = await Promise.all(sellerStatsPromises);
 
-				setTotalStatsAmount(totalStatsCount(users.data, ordersByCurrentMonth.data, ordersByLastMonth.data));
+				const allSellersStats = totalSellersStatsCount(
+					users.data,
+					ordersByCurrentMonth.data,
+					ordersByLastMonth.data,
+					scheduleByCurrentMonth.data,
+					scheduleByLastMonth.data,
+					daysInMonth,
+				);
+
+				setSellersStatsAmount(allSellersStats as SellerStats[]);
+				setTotalStatsAmount(totalStatsCount(allSellersStats as SellerStats[]));
 			} catch (error) {
 				console.error('Error fetching products:', error);
 			} finally {
@@ -64,7 +91,7 @@ export const SalesStats = () => {
 		};
 
 		fetchSellerStats();
-	}, [dispatch]);
+	}, [dispatch, currentMonth, currentYear]);
 
 	return loader ? (
 		<Loader />
@@ -77,9 +104,9 @@ export const SalesStats = () => {
 							headers={tableHeaders}
 							$headerFontSize="14px"
 							tablePoints={[
-								totalStatsAmount.allSellerStats.map((seller) => <SellersRow key={seller.seller} seller={seller} />),
-								totalStatsAmount.onlineSellerStats.map((seller) => <SellersRow key={seller.seller} seller={seller} />),
-								totalStatsAmount.offlineSellerStats.map((seller) => <SellersRow key={seller.seller} seller={seller} />),
+								sellersStatsAmount.map((seller) => <SellersRow key={seller.sellerId} seller={seller} sellType="all" />),
+								sellersStatsAmount.map((seller) => <SellersRow key={seller.sellerId} seller={seller} sellType="online" />),
+								sellersStatsAmount.map((seller) => <SellersRow key={seller.sellerId} seller={seller} sellType="offline" />),
 							]}
 							isSwitcher={true}
 							isSearch={false}

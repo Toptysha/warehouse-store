@@ -1,9 +1,7 @@
 const bcrypt = require("bcrypt");
-const User = require("../models/User");
-// const Token = require("../models/Token");
-const { generateAccessToken, verifyToken } = require("../helpers/token");
+const { generateTokens, verifyAccessToken } = require("../helpers/token");
 const ROLES = require("../constants/roles");
-const {prismaClient} = require("../prisma-service");
+const { prisma } = require("../prisma-service");
 
 async function register(login, phone, password) {
   if (!password) {
@@ -11,57 +9,69 @@ async function register(login, phone, password) {
   }
   const hashPassword = await bcrypt.hash(password, 10);
 
-  const user = await User.create({ login, phone, password: hashPassword });
-  await prismaClient.user.create({
-    data: { login, phone, password: hashPassword }
+  const user = await prisma.user.create({
+    data: { login, phone, password: hashPassword, token: login },
   });
 
-  prismaClient.user.findMany().then((users) => users.forEach((user) => console.log('user.login', user.login)))
+  const { accessToken, refreshToken } = generateTokens({ id: user.id });
 
-  // const refreshToken = generateAccessToken({ id: user.id });
-  const accessToken = generateAccessToken({ id: user.id });
+  const userWithRefreshToken = await editUser(user.id, { token: refreshToken });
 
   return {
-    user,
-    token: accessToken,
+    user: userWithRefreshToken,
+    accessToken,
+    refreshToken,
   };
 }
 
 async function login(phone, password) {
-  const user = await User.findOne({ phone });
+  const user = await prisma.user.findUnique({
+    where: {
+      phone,
+    },
+  });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("такой номер телефона не зарегестрирован");
   }
 
   const isMatchPassword = await bcrypt.compare(password, user.password);
 
   if (!isMatchPassword) {
-    throw new Error("Invalid password");
+    throw new Error("не верный пароль");
   }
 
-  const token = generateAccessToken({ id: user.id });
+  const { accessToken, refreshToken } = generateTokens({ id: user.id });
+
+  await editUser(user.id, { token: refreshToken });
 
   return {
     user,
-    token,
+    accessToken,
+    refreshToken,
   };
 }
 
 function getUser(id) {
-  return User.findById(id);
+  return prisma.user.findUnique({
+    where: {
+      id: Number(id),
+    },
+  });
 }
 
 function getUsers() {
-  return User.find();
-}
-
-function getUserFromPG() {
-  return prismaClient.user.findMany();
+  return prisma.user.findMany();
 }
 
 function getUsersByRoles(roles) {
-  return User.find({ role: { $in: roles } });
+  return prisma.user.findMany({
+    where: {
+      role: {
+        in: roles,
+      },
+    },
+  });
 }
 
 function getRoles() {
@@ -94,11 +104,16 @@ function getRoles() {
 }
 
 function deleteUser(id) {
-  return User.deleteOne({ _id: id });
+  return prisma.user.delete({
+    where: { id: Number(id) },
+  });
 }
 
 function editUser(id, userData) {
-  return User.findByIdAndUpdate(id, userData, { returnDocument: "after" });
+  return prisma.user.update({
+    where: { id: Number(id) },
+    data: userData,
+  });
 }
 
 async function checkAuth(token) {
@@ -106,8 +121,8 @@ async function checkAuth(token) {
     throw new Error("User not found");
   }
 
-  const tokenData = verifyToken(token);
-  const user = await User.findOne({ _id: tokenData.id });
+  const tokenData = verifyAccessToken(token);
+  const user = await getUser(tokenData.id);
 
   return user;
 }
@@ -115,12 +130,31 @@ async function checkAuth(token) {
 async function getUserNameForOrders(orders) {
   const ordersWithUserNames = await Promise.all(
     orders.map(async (order) => {
-      const user = await User.findById(order.authorId);
-      return { ...order, author: user.login };
+      const user = await prisma.user.findUnique({
+        where: { id: Number(order.authorId) },
+        select: { login: true },
+      });
+
+      return { ...order, authorName: user.login };
     })
   );
 
   return ordersWithUserNames;
+}
+
+async function findTokenByUserId(userId) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { token: true },
+  });
+
+  return user.token;
+}
+
+function findUserByToken(token) {
+  return prisma.user.findUnique({
+    where: { token },
+  });
 }
 
 module.exports = {
@@ -134,5 +168,6 @@ module.exports = {
   editUser,
   checkAuth,
   getUserNameForOrders,
-  getUserFromPG
+  findTokenByUserId,
+  findUserByToken,
 };

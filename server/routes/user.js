@@ -5,13 +5,14 @@ const {
   getRoles,
   editUser,
   deleteUser,
-  getUsersByRoles, getUserFromPG,
+  getUsersByRoles,
 } = require("../controllers/user");
 const hasRole = require("../middlewares/hasRole");
 const authenticated = require("../middlewares/authenticated");
 const mapUser = require("../helpers/mapUser");
+const mapUserSimple = require("../helpers/mapUserSimple");
 const ACCESS = require("../constants/access");
-const { changeUserRoleLog } = require("../controllers/log");
+const { changeUserRoleLog, deleteUserLog } = require("../controllers/log");
 
 const router = express.Router({ mergeParams: true });
 
@@ -23,6 +24,20 @@ router.get("/", authenticated, hasRole(ACCESS.USERS), async (req, res) => {
     res.status(400).send({ error: error.message });
   }
 });
+
+router.get(
+  "/get_color",
+  authenticated,
+  hasRole(ACCESS.GET_USER),
+  async (req, res) => {
+    try {
+      const users = await getUsers();
+      res.send({ data: users.map(mapUserSimple) });
+    } catch (error) {
+      res.status(400).send({ error: error.message });
+    }
+  }
+);
 
 router.get(
   "/:id",
@@ -44,7 +59,8 @@ router.post(
   hasRole(ACCESS.GET_USER),
   async (req, res) => {
     try {
-      const users = await getUsersByRoles(req.body.roleIds);
+      const intRoles = req.body.roleIds.map((role) => Number(role));
+      const users = await getUsersByRoles(intRoles);
       res.send({ data: users.map(mapUser) });
     } catch (err) {
       res.send({ error: err.message || "Unknown Error", errorPath: err.path });
@@ -62,28 +78,50 @@ router.patch("/:id", authenticated, hasRole(ACCESS.USERS), async (req, res) => {
     const oldUser = await getUser(req.params.id);
 
     const newUser = await editUser(req.params.id, {
-      role: req.body.roleId,
+      role: Number(req.body.roleId),
     });
 
     await changeUserRoleLog(
-      req.user._id,
+      req.user.id,
       req.params.id,
+      oldUser.login,
       oldUser.role,
       newUser.role
     );
 
     res.send({ data: mapUser(newUser) });
   } catch (error) {
-    res.status(400).send({ error: error.message });
+    res.send({ error: error.message });
   }
 });
+
+router.post(
+  "/change_color",
+  authenticated,
+  hasRole(ACCESS.GET_USER),
+  async (req, res) => {
+    try {
+      const newUser = await editUser(req.body.id, {
+        color: req.body.color,
+      });
+
+      res.send({ data: mapUser(newUser) });
+    } catch (error) {
+      res.send({ error: error.message });
+    }
+  }
+);
 
 router.delete(
   "/:id",
   authenticated,
   hasRole(ACCESS.USERS),
   async (req, res) => {
+    const deletedUser = await getUser(req.params.id);
+
     await deleteUser(req.params.id);
+
+    await deleteUserLog(req.user.id, req.params.id, deletedUser.login);
 
     res.send({ error: null });
   }

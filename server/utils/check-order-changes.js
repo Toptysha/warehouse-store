@@ -1,30 +1,32 @@
 function checkOrderChanges(oldOrder, newOrder) {
+  const oldOrders = oldOrder.orders.set ? oldOrder.orders.set : oldOrder.orders;
+  const newOrders = newOrder.orders.set ? newOrder.orders.set : newOrder.orders;
+
+  let isChanged = false;
+
   if (
     oldOrder.name !== newOrder.name ||
     oldOrder.phone !== newOrder.phone ||
     oldOrder.address !== newOrder.address ||
     oldOrder.deliveryType !== newOrder.deliveryType ||
     oldOrder.deliveryPrice !== newOrder.deliveryPrice ||
-    oldOrder.orders[oldOrder.orders.length - 1].length !==
-      newOrder.orders[newOrder.orders.length - 1].length
+    oldOrders[oldOrders.length - 1].length !==
+      newOrders[newOrders.length - 1].length
   ) {
-    return true;
+    isChanged = true;
   }
 
-  oldOrder.orders[oldOrder.orders.length - 1].forEach(
-    ({ product, size, price }, index) => {
-      if (
-        newOrder.orders[newOrder.orders.length - 1][index].product !==
-          product ||
-        newOrder.orders[newOrder.orders.length - 1][index].size !== size ||
-        newOrder.orders[newOrder.orders.length - 1][index].price !== price
-      ) {
-        return true;
-      }
+  oldOrders[oldOrders.length - 1].forEach(({ product, size, price }, index) => {
+    if (
+      newOrders[newOrders.length - 1][index].product !== product ||
+      newOrders[newOrders.length - 1][index].size !== size ||
+      newOrders[newOrders.length - 1][index].price !== price
+    ) {
+      isChanged = true;
     }
-  );
+  });
 
-  return false;
+  return isChanged;
 }
 
 module.exports = {

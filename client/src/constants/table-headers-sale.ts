@@ -17,6 +17,6 @@ export const tableHeadersSale = (order?: Order, isOfflineDeal?: boolean) => {
 		{key: 'Товары', value: order ? products : []},
 		{key: 'Цена', value: order ? order.totalPrice : ''},
 		{key: 'Дата', value: order ? formatDateFromDb(order.createdAt) : ''},
-		{key: 'Продавец', value: order ? order.author : ''},
+		{key: 'Продавец', value: order ? order.authorName as string	: ''},
 	]
 };

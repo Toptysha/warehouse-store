@@ -24,7 +24,7 @@ export const SalesRow = ({ order }: { order: Order }) => {
 					) : (
 						<div className="products-article">
 							{value.map(({ id, article }, index) => (
-								<div className="article" key={article + index}>
+								<div className="article" key={article + index.toString()}>
 									<Link to={`/catalog/${id}`}>{article}</Link>
 								</div>
 							))}

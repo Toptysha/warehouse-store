@@ -1,19 +1,41 @@
 const express = require("express");
-const { register, login, checkAuth, getUserFromPG} = require("../controllers/user");
+const {
+  register,
+  login,
+  checkAuth,
+  editUser,
+  findUserByToken,
+} = require("../controllers/user");
 const mapUser = require("../helpers/mapUser");
+const {
+  refreshAccessToken,
+  setTokensInDbAndCookie,
+  verifyAccessToken,
+  checkTimeToEndAccessToken,
+} = require("../helpers/token");
+const TOKENS_LIFE = require("../constants/tokens-time-life");
 
 const router = express.Router({ mergeParams: true });
 
 router.post("/register", async (req, res) => {
   try {
-    const { user, token } = await register(
+    const { user, accessToken, refreshToken } = await register(
       req.body.login,
       req.body.phone,
       req.body.password
     );
 
     res
-      .cookie("token", token, { httpOnly: true })
+      .cookie("accessToken", accessToken, {
+        maxAge: TOKENS_LIFE.ACCESS,
+        httpOnly: true,
+        // secure: true, // при использовании https
+      })
+      .cookie("refreshToken", refreshToken, {
+        maxAge: TOKENS_LIFE.REFRESH,
+        httpOnly: true,
+        // secure: true,
+      })
       .send({ error: null, data: mapUser(user) });
   } catch (err) {
     res.send({ error: err.message || "Unknown Error" });
@@ -22,9 +44,22 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const { user, token } = await login(req.body.phone, req.body.password);
+    const { user, accessToken, refreshToken } = await login(
+      req.body.phone,
+      req.body.password
+    );
+
     res
-      .cookie("token", token, { httpOnly: true })
+      .cookie("accessToken", accessToken, {
+        maxAge: TOKENS_LIFE.ACCESS,
+        httpOnly: true,
+        // secure: true, // при использовании https
+      })
+      .cookie("refreshToken", refreshToken, {
+        maxAge: TOKENS_LIFE.REFRESH,
+        httpOnly: true,
+        // secure: true,
+      })
       .send({ error: null, data: mapUser(user) });
   } catch (err) {
     res.send({ error: err.message || "Unknown Error" });
@@ -32,22 +67,20 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/logout", async (req, res) => {
-  res.cookie("token", "", { httpOnly: true }).send({});
+  const user = await findUserByToken(req.cookies.refreshToken);
+  await editUser(user.id, { token: "" });
+  res.clearCookie("accessToken").clearCookie("refreshToken").send({});
 });
 
 router.get("/me", async (req, res) => {
   try {
-    const user = await checkAuth(req.cookies.token);
-    res.send({ data: mapUser(user) });
-  } catch (err) {
-    res.send({ error: err.message });
-  }
-});
-
-router.get("/test", async (req, res) => {
-  try {
-    const users = await getUserFromPG();
-    res.send({ data: users });
+    if (req.cookies.accessToken) {
+      const user = await checkTimeToEndAccessToken(req, res);
+      res.send({ data: mapUser(user) });
+    } else {
+      const user = await setTokensInDbAndCookie(req, res);
+      res.send({ data: mapUser(user) });
+    }
   } catch (err) {
     res.send({ error: err.message });
   }

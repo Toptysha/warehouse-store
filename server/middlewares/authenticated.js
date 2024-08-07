@@ -1,20 +1,22 @@
-const User = require("../models/User");
-const { verifyToken } = require("../helpers/token");
+const {
+  setTokensInDbAndCookie,
+  checkTimeToEndAccessToken,
+} = require("../helpers/token");
 
 module.exports = async function (req, res, next) {
   try {
-    const tokenData = verifyToken(req.cookies.token);
+    if (req.cookies.accessToken) {
+      const user = await checkTimeToEndAccessToken(req, res);
 
-    const user = await User.findOne({ _id: tokenData.id });
+      req.user = user;
+      next();
+    } else {
+      const user = await setTokensInDbAndCookie(req, res);
 
-    if (!user) {
-      res.send({ error: "User not found" });
-      return;
+      req.user = user;
+      next();
     }
-
-    req.user = user;
-    next();
   } catch (error) {
-    res.send({ error: "User not found" });
+    res.send({ error: "Пользователь не авторизован" });
   }
 };

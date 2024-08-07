@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { AuthFormError, Button, Input, UploadPhotos } from '../../../components';
+import { AuthFormError, Button, Input, PrivateContent, UploadPhotos } from '../../../components';
 import styled from 'styled-components';
 import { useForm } from 'react-hook-form';
 import { createArticle, request } from '../../../utils';
 import { useNavigate } from 'react-router-dom';
-import { PHOTO_TYPES, SIZES } from '../../../constants';
+import { ACCESS, PHOTO_TYPES, SIZES } from '../../../constants';
 import { PhotoType } from '../../../interfaces';
 
 const regFormScheme = yup.object().shape({
@@ -77,15 +77,13 @@ export const ProductCreate = () => {
 	const onSubmit = ({ brand, name, color, price }: { brand: string; name: string; color: string; price: string }) => {
 		const article = createArticle();
 
-		let sizes: string[] = [];
-
-		request('/products', 'POST', { article, brand, name, color, price, sizes }).then(({ error, data }) => {
+		request('/products', 'POST', { article, brand, name, color, price, sizes: selectedSizes }).then(({ error, data }) => {
 			if (error) {
 				setServerError(`Ошибка запроса: ${error}`);
 				return;
 			}
-			uploadMeasurements(data._id);
-			uploadCovers(data._id).then(() => navigate('/catalog'));
+			uploadMeasurements(data.id);
+			uploadCovers(data.id).then(() => navigate('/catalog'));
 		});
 	};
 
@@ -170,53 +168,55 @@ export const ProductCreate = () => {
 	};
 
 	return (
-		<ProductCreateContainer>
-			<form onSubmit={handleSubmit(onSubmit)}>
-				<h3>Бренд:</h3>
-				<Input placeholder="Бренд" width="300px" {...register('brand', { onChange: () => setServerError('') })} />
-				<h3>Наименование:</h3>
-				<Input placeholder="Наименование" width="300px" {...register('name', { onChange: () => setServerError('') })} />
-				<h3>Цвет:</h3>
-				<Input placeholder="Цвет" width="300px" {...register('color', { onChange: () => setServerError('') })} />
-				<h3>Цена:</h3>
-				<Input type="number" placeholder="Цена" width="300px" {...register('price', { onChange: () => setServerError('') })} />
-				<h3>Выберите Размеры:</h3>
-				<p>(если не указать размеры, будет считаться, что товар отсутствует)</p>
-				<div className="sizes">
-					{SIZES.map((size, index) => (
-						<div key={index} className="checkbox-sizes">
-							<label>
-								<input type="checkbox" value={size} checked={selectedSizes.includes(size)} onChange={handleOptionChange} />
-								{size}
-							</label>
-						</div>
-					))}
-				</div>
-				{currentSize && (
+		<PrivateContent access={ACCESS.EDIT_PRODUCTS}>
+			<ProductCreateContainer>
+				<form onSubmit={handleSubmit(onSubmit)}>
+					<h3>Бренд:</h3>
+					<Input placeholder="Бренд" width="300px" {...register('brand', { onChange: () => setServerError('') })} />
+					<h3>Наименование:</h3>
+					<Input placeholder="Наименование" width="300px" {...register('name', { onChange: () => setServerError('') })} />
+					<h3>Цвет:</h3>
+					<Input placeholder="Цвет" width="300px" {...register('color', { onChange: () => setServerError('') })} />
+					<h3>Цена:</h3>
+					<Input type="number" placeholder="Цена" width="300px" {...register('price', { onChange: () => setServerError('') })} />
+					<h3>Выберите Размеры:</h3>
+					<p>(если не указать размеры, будет считаться, что товар отсутствует)</p>
+					<div className="sizes">
+						{SIZES.map((size, index) => (
+							<div key={index} className="checkbox-sizes">
+								<label>
+									<input type="checkbox" value={size} checked={selectedSizes.includes(size)} onChange={handleOptionChange} />
+									{size}
+								</label>
+							</div>
+						))}
+					</div>
+					{currentSize && (
+						<UploadPhotos
+							selectedFiles={selectedMeasurements}
+							setSelectedFiles={setSelectedMeasurements}
+							typeOfSelectedFiles={PHOTO_TYPES.MEASUREMENTS as PhotoType}
+							description={`Добавить замеры ${currentSize} размера`}
+							width="290px"
+							$labelLeft="10px"
+							$marginContainer="40px 0"
+						/>
+					)}
+					{selectedAllMeasurements.length > 0 ? <MeasurementsFiles /> : null}
 					<UploadPhotos
-						selectedFiles={selectedMeasurements}
-						setSelectedFiles={setSelectedMeasurements}
-						typeOfSelectedFiles={PHOTO_TYPES.MEASUREMENTS as PhotoType}
-						description={`Добавить замеры ${currentSize} размера`}
-						width="290px"
-						$labelLeft="10px"
+						selectedFiles={selectedCovers}
+						setSelectedFiles={setSelectedCovers}
+						typeOfSelectedFiles={PHOTO_TYPES.COVER as PhotoType}
+						description="Загрузить обложки"
+						width="190px"
+						$labelLeft="60px"
 						$marginContainer="40px 0"
 					/>
-				)}
-				{selectedAllMeasurements.length > 0 ? <MeasurementsFiles /> : null}
-				<UploadPhotos
-					selectedFiles={selectedCovers}
-					setSelectedFiles={setSelectedCovers}
-					typeOfSelectedFiles={PHOTO_TYPES.COVER as PhotoType}
-					description="Загрузить обложки"
-					width="190px"
-					$labelLeft="60px"
-					$marginContainer="40px 0"
-				/>
-				<Button className="reg-button" description="Создать товар" type="submit" disabled={!!formError} />
-				{errorMessage && <AuthFormError>{errorMessage}</AuthFormError>}
-			</form>
-		</ProductCreateContainer>
+					<Button className="reg-button" description="Создать товар" type="submit" disabled={!!formError} />
+					{errorMessage && <AuthFormError>{errorMessage}</AuthFormError>}
+				</form>
+			</ProductCreateContainer>
+		</PrivateContent>
 	);
 };
 

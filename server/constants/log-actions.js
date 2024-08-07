@@ -14,6 +14,7 @@ const LOG_ACTIONS = {
   },
   USER_ACTIONS: {
     UPDATE_ROLE: "updateUserRole",
+    DELETE: "deleteUser",
   },
 };
 

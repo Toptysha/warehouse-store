@@ -13,6 +13,6 @@ export const tableHeadersExchange = (order?: Order, isReturned?: boolean) => {
 		{key: 'Дата заказа', value: order ? formatDateFromDb(order.createdAt) : ''},
 		{key: 'Дата обмена/возврата', value: order ? formatDateFromDb(order.updatedAt) : ''},
 		{key: 'Товары', value: order ? productsArticle : []},
-		{key: 'Продавец', value: order ? order.author : ''}
+		{key: 'Продавец', value: order ? order.authorName as string : ''}
 	]
 };

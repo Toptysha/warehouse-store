@@ -1,38 +1,32 @@
 export interface SellerStats {
-	seller: string;
-	currentMonthRevenueAmount: string;
-	lastMonthRevenueAmount: string;
-	currentMonthProductsAmount: string;
-	lastMonthProductsAmount: string;
-	currentMonthWage: string;
-	lastMonthWage: string;
+	sellerId: string;
+	sellerName: string;
+	amountOfWorkDaysInCurrentMonth: number;
+	totalOfflinePriceInCurrentMonth: number;
+	totalOnlinePriceInCurrentMonth: number;
+	totalOfflineProductsInCurrentMonth: number;
+	totalOnlineProductsInCurrentMonth: number;
+	offlineWageInCurrentMonth: number;
+	onlineWageInCurrentMonth: number;
+	amountOfWorkDaysInLastMonth: number;
+	totalOfflinePriceInLastMonth: number;
+	totalOnlinePriceInLastMonth: number;
+	totalOfflineProductsInLastMonth: number;
+	totalOnlineProductsInLastMonth: number;
+	offlineWageInLastMonth: number;
+	onlineWageInLastMonth: number;
 }
-
-export interface UnionSellerStats {
-	allSellerStats: SellerStats[];
-	onlineSellerStats: SellerStats[];
-	offlineSellerStats: SellerStats[];
-}
-
 export interface TotalStats {
-	currentMonthOnlineSellsTotalRevenueAmount: number;
-	currentMonthOfflineSellsTotalRevenueAmount: number;
-	currentMonthTotalRevenueAmount: number;
-	lastMonthOnlineSellsTotalRevenueAmount: number;
-	lastMonthOfflineSellsTotalRevenueAmount: number;
-	lastMonthTotalRevenueAmount: number;
-	currentMonthOnlineSellsTotalProductsAmount: number;
-	currentMonthOfflineSellsTotalProductsAmount: number;
-	currentMonthTotalProductsAmount: number;
-	lastMonthOnlineSellsTotalProductsAmount: number;
-	lastMonthOfflineSellsTotalProductsAmount: number;
-	lastMonthTotalProductsAmount: number;
-	currentMonthOnlineSellersTotalWage: number;
-	currentMonthOfflineSellersTotalWage: number;
-	currentMonthTotalWage: number;
-	lastMonthOnlineSellersTotalWage: number;
-	lastMonthOfflineSellersTotalWage: number;
-	lastMonthTotalWage: number;
+	totalOfflinePriceInCurrentMonth: number;
+	totalOnlinePriceInCurrentMonth: number;
+	totalOfflineProductsInCurrentMonth: number;
+	totalOnlineProductsInCurrentMonth: number;
+	offlineWageInCurrentMonth: number;
+	onlineWageInCurrentMonth: number;
+	totalOfflinePriceInLastMonth: number;
+	totalOnlinePriceInLastMonth: number;
+	totalOfflineProductsInLastMonth: number;
+	totalOnlineProductsInLastMonth: number;
+	offlineWageInLastMonth: number;
+	onlineWageInLastMonth: number;
 }
-
-export interface UnionTotalStats extends UnionSellerStats, TotalStats {}

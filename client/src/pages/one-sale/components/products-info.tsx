@@ -1,62 +1,45 @@
 import { Link } from 'react-router-dom';
 import { SaleProduct, UpdatedProduct } from '../../../interfaces';
 import styled from 'styled-components';
-import { useEffect, useState } from 'react';
 import deletedProduct from '../../../images/product_deleted.png';
 
 export const ProductsInfo = ({ products, orderProducts }: { products: UpdatedProduct[]; orderProducts: SaleProduct[] }) => {
-	const [productIndexes, setProductIndexes] = useState<number[]>([]);
-
 	const sellPriceMessage = (basePrice: string, sellPrice: string) => {
 		const discount = Number(basePrice) - Number(sellPrice);
 		const discountPercent = ((discount / Number(basePrice)) * 100).toFixed(2);
 		return `${sellPrice}, скидка = ${discount} (${discountPercent}%) `;
 	};
 
-	useEffect(() => {
-		let i = 0;
-		let plusIndexes: number[] = [];
-		orderProducts.forEach(({ productId }, index) => {
-			if (productId === products[index - i]?.id) {
-				plusIndexes.push(i);
-			} else {
-				i++;
-				plusIndexes.push(i);
-			}
-		});
-		setProductIndexes(plusIndexes);
-	}, [products, orderProducts]);
-
 	return (
 		<ProductsInfoContainer>
-			{orderProducts.map((product, index) => {
-				return products[index - productIndexes[index]]?.id === product.productId ? (
+			{products.map((product, index) => {
+				return product.id !== 'none' ? (
 					<div key={index} className="product-card">
-						<Link to={`/catalog/${products[index - productIndexes[index]].id}`}>
+						<Link to={`/catalog/${product.id}`}>
 							<div className="cover">
-								<img src={products[index - productIndexes[index]].cover} alt="COVER" />
+								<img src={product.cover} alt="COVER" />
 							</div>
 							<div className="product-info">
 								<p>
-									Артикул: <span>{products[index - productIndexes[index]].article}</span>
+									Артикул: <span>{product.article}</span>
 								</p>
 								<p>
-									Бренд: <span>{products[index - productIndexes[index]].brand}</span>
+									Бренд: <span>{product.brand}</span>
 								</p>
 								<p>
-									Наименование: <span>{products[index - productIndexes[index]].name}</span>
+									Наименование: <span>{product.name}</span>
 								</p>
 								<p>
-									Цвет: <span>{products[index - productIndexes[index]].color}</span>
+									Цвет: <span>{product.color}</span>
 								</p>
 								<p>
-									Базовая цена: <span>{products[index - productIndexes[index]].oldPrice}</span>
+									Базовая цена: <span>{product.oldPrice}</span>
 								</p>
 								<p>
-									Цена продажи: <span>{sellPriceMessage(products[index - productIndexes[index]].oldPrice, products[index - productIndexes[index]].price)}</span>
+									Цена продажи: <span>{sellPriceMessage(product.oldPrice, product.price)}</span>
 								</p>
 								<p>
-									Размер: <span>{products[index - productIndexes[index]].size}</span>
+									Размер: <span>{product.size}</span>
 								</p>
 							</div>
 						</Link>
@@ -70,7 +53,7 @@ export const ProductsInfo = ({ products, orderProducts }: { products: UpdatedPro
 							<p className="red-style">
 								<span>Товар был удалён</span>
 								<br />
-								Цена продажи товара была: <span className="black-style">{product.price}</span>
+								Цена продажи товара была: <span className="black-style">{orderProducts[index].price}</span>
 							</p>
 						</div>
 					</div>

@@ -1,34 +1,30 @@
 const { rimraf } = require("rimraf");
-const Product = require("../models/Product");
 const { photosDirectory } = require("./photos");
+const { prisma } = require("../prisma-service");
 
-async function addProduct(product) {
-  const newProduct = await Product.create(product);
-
-  return newProduct;
+function addProduct(product) {
+  return prisma.product.create({ data: product });
 }
 
 async function getProducts(search = "", limit = 10, page = 1) {
+  const where = {
+    OR: [
+      { article: { contains: search, mode: "insensitive" } },
+      { brand: { contains: search, mode: "insensitive" } },
+      { name: { contains: search, mode: "insensitive" } },
+      { color: { contains: search, mode: "insensitive" } },
+      { price: { contains: search, mode: "insensitive" } },
+    ],
+  };
+
   const [products, countProducts] = await Promise.all([
-    Product.find({
-      $or: [
-        { article: { $regex: search, $options: "i" } },
-        { brand: { $regex: search, $options: "i" } },
-        { name: { $regex: search, $options: "i" } },
-        { color: { $regex: search, $options: "i" } },
-        { price: { $regex: search, $options: "i" } },
-      ],
-    })
-      .limit(limit)
-      .skip(limit * (page - 1))
-      .sort({ createdAt: -1 }),
-    Product.countDocuments(
-      { article: { $regex: search, $options: "i" } } || {
-          brand: { $regex: search, $options: "i" },
-        } || { name: { $regex: search, $options: "i" } } || {
-          color: { $regex: search, $options: "i" },
-        } || { price: { $regex: search, $options: "i" } }
-    ),
+    prisma.product.findMany({
+      where,
+      take: Number(limit),
+      skip: limit * (page - 1),
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.product.count({ where }),
   ]);
 
   return {
@@ -38,15 +34,22 @@ async function getProducts(search = "", limit = 10, page = 1) {
 }
 
 function getProduct(id) {
-  return Product.findById(id);
+  return prisma.product.findUnique({
+    where: {
+      id: Number(id),
+    },
+  });
 }
 
 function getProductByArticle(partOfArticle) {
-  const product = Product.find({
-    article: { $regex: partOfArticle, $options: "i" },
+  return prisma.product.findMany({
+    where: {
+      article: {
+        contains: partOfArticle,
+        mode: "insensitive",
+      },
+    },
   });
-
-  return product;
 }
 
 async function deleteProduct(id) {
@@ -54,46 +57,35 @@ async function deleteProduct(id) {
 
   rimraf.moveRemoveSync(folderPath);
 
-  return Product.deleteOne({ _id: id });
+  return prisma.product.delete({
+    where: { id: Number(id) },
+  });
 }
 
 async function editProduct(id, product) {
-  let updatedProduct;
-
+  // Проверка и рефакторинг цены, если она есть
   if (product.price) {
     let refactorPrice = "";
     if (
-      !Number(product.price) ||
+      isNaN(product.price) ||
       product.price.includes(".") ||
       product.price.includes(",")
     ) {
-      arrOfPrice = product.price.split("");
+      const arrOfPrice = product.price.split("");
       arrOfPrice.forEach((element) => {
-        if (Number(element) || element === "0") {
+        if (!isNaN(element) && element !== " ") {
           refactorPrice += element;
         }
       });
+      product.price = refactorPrice === "" ? product.price : refactorPrice;
     }
-
-    updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      {
-        ...product,
-        price: refactorPrice === "" ? product.price : refactorPrice,
-      },
-      {
-        returnDocument: "after",
-      }
-    );
-  } else {
-    updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      { ...product },
-      {
-        returnDocument: "after",
-      }
-    );
   }
+
+  // Обновление продукта
+  const updatedProduct = await prisma.product.update({
+    where: { id: parseInt(id) },
+    data: { ...product },
+  });
 
   return updatedProduct;
 }
@@ -103,20 +95,22 @@ async function getProductArticlesForOrders(orders) {
     orders.map(async (order) => {
       const productsWithArticles = await Promise.all(
         order.product.map(async (products) => {
-          const productWithArticle = await Promise.all(
+          const productWithArticles = await Promise.all(
             products.map(async (product) => {
-              const productData = await Product.findById(product.productId);
+              const productData = await prisma.product.findUnique({
+                where: { id: Number(product.productId) },
+                select: { article: true },
+              });
+
               return {
                 ...product,
                 productArticle: productData?.article,
               };
             })
           );
-
-          return productWithArticle;
+          return productWithArticles;
         })
       );
-
       return { ...order, product: productsWithArticles };
     })
   );

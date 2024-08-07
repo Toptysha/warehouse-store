@@ -3,6 +3,7 @@ export interface SaleProduct {
 	productArticle: string
 	size: string
 	price: string
+	createdAt: Date
 }
 
 export interface Sale {
@@ -17,7 +18,6 @@ export interface Sale {
 	totalPrice: string
 	authorId: string
 	authorName?: string
-	author: string
 	createdAt: string
 	updatedAt: string
 }

@@ -31,6 +31,8 @@ export const DealHistory = ({ order }: { order: Order }) => {
 		fetchProducts();
 	}, [order.product]);
 
+	const orderProductReverse = [...order.product].reverse();
+
 	return (
 		<DealHistoryContainer>
 			<div className="buttons">
@@ -42,9 +44,9 @@ export const DealHistory = ({ order }: { order: Order }) => {
 					}}
 				/>
 			</div>
-			{isShowHistory ? (
+			{isShowHistory && (
 				<div className="products-history">
-					{arrOfProducts.map((products, index) => {
+					{arrOfProducts.reverse().map((products, index) => {
 						if (index !== 0) {
 							if (products.length === 0) {
 								return (
@@ -57,7 +59,7 @@ export const DealHistory = ({ order }: { order: Order }) => {
 								return (
 									<div key={index}>
 										<p className={`${index === 1 ? 'arrow-down cancel-margin' : 'arrow-down'}`}>⇧</p>
-										<ProductsInfo products={products} orderProducts={order.product[index]} />
+										<ProductsInfo products={products} orderProducts={orderProductReverse[index]} />
 									</div>
 								);
 							}
@@ -66,8 +68,6 @@ export const DealHistory = ({ order }: { order: Order }) => {
 						}
 					})}
 				</div>
-			) : (
-				<></>
 			)}
 		</DealHistoryContainer>
 	);

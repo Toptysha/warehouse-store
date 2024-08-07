@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int            @id @default(autoincrement())
+  login     String         @unique
+  phone     String         @unique
+  password  String
+  role      Int            @default(4)
+  token     String         @unique
+  color     String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @default(now())
+  product   Product[]
+  order     Order[]
+  log       Log[]
+  schedules ScheduleUser[]
+  schedul   Schedule[]
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  article   String   @unique
+  brand     String
+  name      String
+  color     String
+  price     String
+  sizes     String[]
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Order {
+  id            Int      @id @default(autoincrement())
+  name          String
+  phone         String
+  address       String
+  deliveryType  String
+  isExchange    Boolean
+  orders        Json
+  deliveryPrice String
+  totalPrice    String
+  authorId      Int
+  author        User     @relation(fields: [authorId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+}
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  action    String
+  product   Json?
+  order     Json?
+  user      Json?
+  createdAt DateTime @default(now())
+}
+
+model Schedule {
+  id        Int            @id @default(autoincrement())
+  date      DateTime       @unique
+  sellers   ScheduleUser[]
+  authorId  Int
+  author    User           @relation(fields: [authorId], references: [id])
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @default(now())
+}
+
+model ScheduleUser {
+  scheduleId Int
+  userId     Int
+  schedule   Schedule @relation(fields: [scheduleId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@id([scheduleId, userId])
+}

@@ -6,24 +6,24 @@ export const TotalInfoBlock = ({ totalAmount, switcherPosition }: { totalAmount:
 		<TotalInfoBlockContainer>
 			<div className="block-total-info">
 				<div className="table-total-info">
-					В этом месяце продано на <b>{totalAmount?.currentMonthTotalRevenueAmount} р.</b>
+					В этом месяце продано на <b>{totalAmount.totalOfflinePriceInCurrentMonth + totalAmount.totalOnlinePriceInCurrentMonth} р.</b>
 				</div>
 				<div className="table-total-info">
-					В этом месяце продано <b>{totalAmount?.currentMonthTotalProductsAmount} товаров</b>
+					В этом месяце продано <b>{totalAmount.totalOfflineProductsInCurrentMonth + totalAmount.totalOnlineProductsInCurrentMonth} товаров</b>
 				</div>
 				<div className="table-total-info">
-					В этом месяце будет потрачено <b>{totalAmount?.currentMonthTotalWage} р. на ЗП</b> (посчитаны только проценты от продаж)
+					В этом месяце будет потрачено <b>{totalAmount.offlineWageInCurrentMonth + totalAmount.onlineWageInCurrentMonth} р. на ЗП</b> (посчитаны только проценты от продаж)
 				</div>
 			</div>
 			<div className="block-total-info">
 				<div className="table-total-info">
-					В прошлом месяце продано на <b>{totalAmount?.lastMonthTotalRevenueAmount} р.</b>
+					В прошлом месяце продано на <b>{totalAmount.totalOfflinePriceInLastMonth + totalAmount.totalOnlinePriceInLastMonth} р.</b>
 				</div>
 				<div className="table-total-info">
-					В прошлом месяце продано <b>{totalAmount?.lastMonthTotalProductsAmount} товаров</b>
+					В прошлом месяце продано <b>{totalAmount.totalOfflineProductsInLastMonth + totalAmount.totalOnlineProductsInLastMonth} товаров</b>
 				</div>
 				<div className="table-total-info">
-					В прошлом месяце было потрачено <b>{totalAmount?.lastMonthTotalWage} р. на ЗП</b> (посчитаны только проценты от продаж)
+					В прошлом месяце было потрачено <b>{totalAmount.offlineWageInLastMonth + totalAmount.onlineWageInLastMonth} р. на ЗП</b> (посчитаны только проценты от продаж)
 				</div>
 			</div>
 		</TotalInfoBlockContainer>
@@ -31,24 +31,24 @@ export const TotalInfoBlock = ({ totalAmount, switcherPosition }: { totalAmount:
 		<TotalInfoBlockContainer>
 			<div className="block-total-info">
 				<div className="table-total-info">
-					В этом месяце продано на <b>{totalAmount?.currentMonthOnlineSellsTotalRevenueAmount} р.</b>
+					В этом месяце продано на <b>{totalAmount.totalOnlinePriceInCurrentMonth} р.</b>
 				</div>
 				<div className="table-total-info">
-					В этом месяце продано <b>{totalAmount?.currentMonthOnlineSellsTotalProductsAmount} товаров</b>
+					В этом месяце продано <b>{totalAmount.totalOnlineProductsInCurrentMonth} товаров</b>
 				</div>
 				<div className="table-total-info">
-					В этом месяце будет потрачено <b>{totalAmount?.currentMonthOnlineSellersTotalWage} р. на ЗП</b> (посчитаны только проценты от продаж)
+					В этом месяце будет потрачено <b>{totalAmount.onlineWageInCurrentMonth} р. на ЗП</b> (посчитаны только проценты от продаж)
 				</div>
 			</div>
 			<div className="block-total-info">
 				<div className="table-total-info">
-					В прошлом месяце продано на <b>{totalAmount?.lastMonthOnlineSellsTotalRevenueAmount} р.</b>
+					В прошлом месяце продано на <b>{totalAmount.totalOnlinePriceInLastMonth} р.</b>
 				</div>
 				<div className="table-total-info">
-					В прошлом месяце продано <b>{totalAmount?.lastMonthOnlineSellsTotalProductsAmount} товаров</b>
+					В прошлом месяце продано <b>{totalAmount.totalOnlineProductsInLastMonth} товаров</b>
 				</div>
 				<div className="table-total-info">
-					В прошлом месяце было потрачено <b>{totalAmount?.lastMonthOnlineSellersTotalWage} р. на ЗП</b> (посчитаны только проценты от продаж)
+					В прошлом месяце было потрачено <b>{totalAmount.onlineWageInLastMonth} р. на ЗП</b> (посчитаны только проценты от продаж)
 				</div>
 			</div>
 		</TotalInfoBlockContainer>
@@ -56,24 +56,24 @@ export const TotalInfoBlock = ({ totalAmount, switcherPosition }: { totalAmount:
 		<TotalInfoBlockContainer>
 			<div className="block-total-info">
 				<div className="table-total-info">
-					В этом месяце продано на <b>{totalAmount?.currentMonthOfflineSellsTotalRevenueAmount} р.</b>
+					В этом месяце продано на <b>{totalAmount.totalOfflinePriceInCurrentMonth} р.</b>
 				</div>
 				<div className="table-total-info">
-					В этом месяце продано <b>{totalAmount?.currentMonthOfflineSellsTotalProductsAmount} товаров</b>
+					В этом месяце продано <b>{totalAmount.totalOfflineProductsInCurrentMonth} товаров</b>
 				</div>
 				<div className="table-total-info">
-					В этом месяце будет потрачено <b>{totalAmount?.currentMonthOfflineSellersTotalWage} р. на ЗП</b> (посчитаны только проценты от продаж)
+					В этом месяце будет потрачено <b>{totalAmount.offlineWageInCurrentMonth} р. на ЗП</b> (посчитаны только проценты от продаж)
 				</div>
 			</div>
 			<div className="block-total-info">
 				<div className="table-total-info">
-					В прошлом месяце продано на <b>{totalAmount?.lastMonthOfflineSellsTotalRevenueAmount} р.</b>
+					В прошлом месяце продано на <b>{totalAmount.totalOfflinePriceInLastMonth} р.</b>
 				</div>
 				<div className="table-total-info">
-					В прошлом месяце продано <b>{totalAmount?.lastMonthOfflineSellsTotalProductsAmount} товаров</b>
+					В прошлом месяце продано <b>{totalAmount.totalOfflineProductsInLastMonth} товаров</b>
 				</div>
 				<div className="table-total-info">
-					В прошлом месяце было потрачено <b>{totalAmount?.lastMonthOfflineSellersTotalWage} р. на ЗП</b> (посчитаны только проценты от продаж)
+					В прошлом месяце было потрачено <b>{totalAmount.offlineWageInLastMonth} р. на ЗП</b> (посчитаны только проценты от продаж)
 				</div>
 			</div>
 		</TotalInfoBlockContainer>

@@ -1,5 +1,5 @@
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { Authorization, Catalog, Exchanges, Logs, Main, OneSale, Product, Sales, SalesStats, Users } from './pages';
+import { Authorization, Catalog, Exchanges, Logs, Main, OneSale, Product, Sales, SalesStats, Schedule, Users } from './pages';
 import { Header, Footer, Modal, Location, Error } from './components';
 import { useAppDispatch } from './redux/store';
 import { useEffect, useLayoutEffect } from 'react';
@@ -47,6 +47,7 @@ export default function App() {
 					<Route path="/exchanges" element={<Exchanges />} />
 					<Route path="/users" element={<Users />} />
 					<Route path="/logs" element={<Logs />} />
+					<Route path="/schedule" element={<Schedule />} />
 					<Route path="*" element={<Error error={ERROR.PAGE_NOT_EXIST} />} />
 				</Routes>
 			</div>
