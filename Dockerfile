@@ -1,16 +1,27 @@
+# Используйте официальный образ Node.js
 FROM node:18
 
-WORKDIR  /usr/src/app
+# Установите рабочий каталог
+WORKDIR /usr/src/app
 
+# Скопируйте все файлы в рабочий каталог
 COPY . .
 
-WORKDIR  /usr/src/app/client
-RUN npm i
+# Установите зависимости для клиентской части и соберите клиент
+WORKDIR /usr/src/app/client
+RUN npm install
 RUN npm run build
 
-WORKDIR  /usr/src/app/server
-RUN npm i
+# Установите зависимости для серверной части
+WORKDIR /usr/src/app/server
+RUN npm install
 
+# Запустите миграции Prisma
+RUN npx prisma generate
+RUN npx prisma migrate deploy
+
+# Откройте порт 7000
 EXPOSE 7000
 
+# Запустите приложение
 CMD ["node", "app.js"]

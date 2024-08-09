@@ -39,48 +39,54 @@ export const Schedule = () => {
 				console.log(error);
 				dispatch(closeLoader());
 			} else {
-				setSelectedDatesInit(data.schedules);
-				setSelectedDates(data.schedules);
-
 				setLatestUpdate(data.latestUpdated);
 
-				let usersId: string[] = [];
-				data.schedules.forEach((scheduleElement: SelectedDate) => {
-					scheduleElement.sellerIds.forEach((sellerId) => {
-						!usersId.includes(sellerId) && usersId.push(sellerId);
-					});
-				});
+				if (data.schedules !== null) {
+					setSelectedDatesInit(data.schedules);
+					setSelectedDates(data.schedules);
 
-				const userPromises = usersId.map((sellerId) => request(`/users/${sellerId}`));
-
-				// Обрабатываем результаты всех промисов
-				Promise.all(userPromises)
-					.then((userResults) => {
-						// userResults - массив результатов промисов
-						let errorUsers = null;
-						let dataUsers: User[] = [];
-
-						userResults.forEach(({ error, data }) => {
-							if (error) {
-								errorUsers = error;
-							} else {
-								dataUsers.push(data);
-							}
+					let usersId: string[] = [];
+					data.schedules.forEach((scheduleElement: SelectedDate) => {
+						scheduleElement.sellerIds.forEach((sellerId) => {
+							!usersId.includes(sellerId) && usersId.push(sellerId);
 						});
-
-						if (errorUsers) {
-							console.log(errorUsers);
-						} else {
-							setSellersInit(dataUsers);
-							setSellers(dataUsers);
-						}
-					})
-					.catch((error) => {
-						console.log('Error fetching users:', error);
-					})
-					.finally(() => {
-						dispatch(closeLoader());
 					});
+
+					const userPromises = usersId.map((sellerId) => request(`/users/${sellerId}`));
+
+					// Обрабатываем результаты всех промисов
+					Promise.all(userPromises)
+						.then((userResults) => {
+							// userResults - массив результатов промисов
+							let errorUsers = null;
+							let dataUsers: User[] = [];
+
+							userResults.forEach(({ error, data }) => {
+								if (error) {
+									errorUsers = error;
+								} else {
+									dataUsers.push(data);
+								}
+							});
+
+							if (errorUsers) {
+								console.log(errorUsers);
+							} else {
+								setSellersInit(dataUsers);
+								setSellers(dataUsers);
+							}
+						})
+						.catch((error) => {
+							console.log('Error fetching users:', error);
+						})
+						.finally(() => {
+							dispatch(closeLoader());
+						});
+				} else {
+					setSelectedDatesInit([]);
+					setSelectedDates([]);
+					dispatch(closeLoader());
+				}
 			}
 		});
 		request(`/users/get_color`).then(({ error, data }) => {
@@ -140,6 +146,8 @@ export const Schedule = () => {
 		setCurrentColorUser(undefined);
 		setIsEditing(false);
 	};
+
+	console.log('TEST', currentYear, currentMonth);
 
 	return loader ? (
 		<Loader />

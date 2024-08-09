@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const mongoose = require("mongoose");
+
 const cookieParser = require("cookie-parser");
 const routes = require("./routes");
 const { photosDirectory } = require("./controllers/photos");
@@ -17,6 +17,4 @@ app.use(cookieParser());
 app.use("/", routes);
 app.use("/photos", express.static(photosDirectory()));
 
-mongoose.connect(process.env.DB_URL).then(() => {
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -21,6 +21,14 @@ async function getScheduleByMonth(year, month) {
   });
 }
 
+async function getLastSchedule() {
+  return await prisma.schedule.findFirst({
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+}
+
 async function addSchedule(schedules) {
   const upsertPromises = schedules.map(async (schedule) => {
     let sellersData = [];
@@ -128,6 +136,7 @@ async function deleteScheduleByMonth(year, month) {
 
 module.exports = {
   getScheduleByMonth,
+  getLastSchedule,
   addSchedule,
   deleteScheduleByMonth,
 };

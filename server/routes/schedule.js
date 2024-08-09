@@ -10,6 +10,7 @@ const {
   getScheduleByMonth,
   addSchedule,
   deleteScheduleByMonth,
+  getLastSchedule,
 } = require("../controllers/schedule");
 const { mapSchedule } = require("../helpers/mapSchedule");
 
@@ -22,21 +23,31 @@ router.post(
   hasRole(ACCESS.WATCH_SCHEDULE),
   async (req, res) => {
     try {
-      const schedules = await getScheduleByMonth(req.body.year, req.body.month);
+      const schedulesByMonth = await getScheduleByMonth(
+        req.body.year,
+        req.body.month
+      );
 
-      const latestUpdated = schedules.reduce((latest, current) => {
-        return new Date(current.updatedAt) > new Date(latest.updatedAt)
-          ? current
-          : latest;
-      }, schedules[0]);
+      const lastSchedule = await getLastSchedule();
 
-      const author = await getUser(latestUpdated.authorId);
+      console.log("lastSchedule", lastSchedule);
+
+      // const latestUpdated = schedulesByMonth.reduce((latest, current) => {
+      //   return new Date(current.updatedAt) > new Date(latest.updatedAt)
+      //     ? current
+      //     : latest;
+      // }, schedulesByMonth[0]);
+
+      const author = await getUser(lastSchedule.authorId);
 
       res.send({
         data: {
-          schedules: mapSchedule(schedules),
+          schedules:
+            schedulesByMonth.length !== 0
+              ? mapSchedule(schedulesByMonth)
+              : null,
           latestUpdated: {
-            updatedAt: latestUpdated.updatedAt,
+            updatedAt: lastSchedule.updatedAt,
             authorName: author.login,
           },
         },
