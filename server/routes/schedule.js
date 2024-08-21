@@ -30,14 +30,6 @@ router.post(
 
       const lastSchedule = await getLastSchedule();
 
-      console.log("lastSchedule", lastSchedule);
-
-      // const latestUpdated = schedulesByMonth.reduce((latest, current) => {
-      //   return new Date(current.updatedAt) > new Date(latest.updatedAt)
-      //     ? current
-      //     : latest;
-      // }, schedulesByMonth[0]);
-
       const author = await getUser(lastSchedule.authorId);
 
       res.send({

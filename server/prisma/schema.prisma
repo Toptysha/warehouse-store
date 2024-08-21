@@ -14,20 +14,21 @@ datasource db {
 }
 
 model User {
-  id        Int            @id @default(autoincrement())
-  login     String         @unique
-  phone     String         @unique
-  password  String
-  role      Int            @default(4)
-  token     String         @unique
-  color     String?
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @default(now())
-  product   Product[]
-  order     Order[]
-  log       Log[]
-  schedules ScheduleUser[]
-  schedul   Schedule[]
+  id          Int            @id @default(autoincrement())
+  login       String         @unique
+  phone       String         @unique
+  password    String
+  reservePass String         @unique
+  role        Int            @default(4)
+  token       String         @unique
+  color       String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @default(now())
+  product     Product[]
+  order       Order[]
+  log         Log[]
+  schedules   ScheduleUser[]
+  schedul     Schedule[]
 }
 
 model Product {

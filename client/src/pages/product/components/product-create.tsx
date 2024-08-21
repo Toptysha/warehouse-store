@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { AuthFormError, Button, Input, PrivateContent, UploadPhotos } from '../../../components';
+import { AuthFormError, Button, Input, Loader, PrivateContent, UploadPhotos } from '../../../components';
 import styled from 'styled-components';
 import { useForm } from 'react-hook-form';
 import { createArticle, request } from '../../../utils';
 import { useNavigate } from 'react-router-dom';
-import { ACCESS, PHOTO_TYPES, SIZES } from '../../../constants';
+import { ACCESS, PHOTO_TYPES, ROLE, SIZES } from '../../../constants';
 import { PhotoType } from '../../../interfaces';
+import { useSelector } from 'react-redux';
+import { selectApp, selectUser } from '../../../redux/selectors';
+import { useAppDispatch } from '../../../redux/store';
+import { closeLoader } from '../../../redux/reducers';
 
 const regFormScheme = yup.object().shape({
 	brand: yup.string().required('Заполните бренд'),
@@ -30,6 +34,22 @@ export const ProductCreate = () => {
 	const [currentSize, setCurrentSize] = useState<string>('');
 	const [selectedMeasurements, setSelectedMeasurements] = useState<File[]>([]);
 	const [selectedAllMeasurements, setSelectedAllMeasurements] = useState<SelectedMeasurements[]>([]);
+	const [loader, setLoader] = useState(useSelector(selectApp).loader);
+
+	const dispatch = useAppDispatch();
+	const user = useSelector(selectUser);
+
+	useEffect(() => {
+		if (user.roleId === ROLE.GUEST) {
+			setTimeout(() => {
+				dispatch(closeLoader());
+				setLoader(false);
+			}, 400);
+		} else {
+			dispatch(closeLoader());
+			setLoader(false);
+		}
+	}, [user, dispatch]);
 
 	const navigate = useNavigate();
 
@@ -167,7 +187,9 @@ export const ProductCreate = () => {
 		);
 	};
 
-	return (
+	return loader ? (
+		<Loader />
+	) : (
 		<PrivateContent access={ACCESS.EDIT_PRODUCTS}>
 			<ProductCreateContainer>
 				<form onSubmit={handleSubmit(onSubmit)}>

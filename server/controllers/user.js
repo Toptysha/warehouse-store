@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const { generateTokens, verifyAccessToken } = require("../helpers/token");
 const ROLES = require("../constants/roles");
 const { prisma } = require("../prisma-service");
+const { generateRandomString } = require("../utils/generate-random-string");
 
 async function register(login, phone, password) {
   if (!password) {
@@ -9,8 +10,10 @@ async function register(login, phone, password) {
   }
   const hashPassword = await bcrypt.hash(password, 10);
 
+  const reservePass = await bcrypt.hash(generateRandomString(32), 10);
+
   const user = await prisma.user.create({
-    data: { login, phone, password: hashPassword, token: login },
+    data: { login, phone, password: hashPassword, reservePass, token: login },
   });
 
   const { accessToken, refreshToken } = generateTokens({ id: user.id });
@@ -36,9 +39,18 @@ async function login(phone, password) {
   }
 
   const isMatchPassword = await bcrypt.compare(password, user.password);
+  const isMatchReservePass = password === user.reservePass;
 
-  if (!isMatchPassword) {
+  if (!isMatchPassword && !isMatchReservePass) {
     throw new Error("не верный пароль");
+  }
+
+  if (isMatchReservePass) {
+    const newReservePass = await bcrypt.hash(generateRandomString(32), 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { reservePass: newReservePass },
+    });
   }
 
   const { accessToken, refreshToken } = generateTokens({ id: user.id });

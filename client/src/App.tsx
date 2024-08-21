@@ -1,5 +1,5 @@
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { Authorization, Catalog, Exchanges, Logs, Main, OneSale, Product, Sales, SalesStats, Schedule, Users } from './pages';
+import { AccountExchange, Authorization, Catalog, Exchanges, Logs, Main, OneSale, Product, Sales, SalesStats, Schedule, Users } from './pages';
 import { Header, Footer, Modal, Location, Error } from './components';
 import { useAppDispatch } from './redux/store';
 import { useEffect, useLayoutEffect } from 'react';
@@ -36,6 +36,7 @@ export default function App() {
 				<Routes>
 					<Route path="/" element={<Main />} />
 					<Route path="/login" element={<Authorization />} />
+					<Route path="/account_exchange" element={<AccountExchange />} />
 					<Route path="/catalog" element={<Catalog />} />
 					<Route path="/catalog/:id" element={<Product />} />
 					<Route path="/catalog/:id/edit" element={<Product />} />

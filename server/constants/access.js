@@ -47,7 +47,7 @@ const ACCESS = {
     ROLES.SELLER_ON_STORE,
   ],
 
-  USERS: [ROLES.ADMIN],
+  GET_USERS: [ROLES.ADMIN],
 
   GET_USER: [
     ROLES.ADMIN,

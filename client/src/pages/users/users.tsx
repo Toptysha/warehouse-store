@@ -37,7 +37,19 @@ export const Users = () => {
 				<Table
 					headers={tableHeaders}
 					$headerFontSize="18px"
-					tablePoints={[users.map((user) => <UserRow key={user.login} id={user.id} login={user.login} phone={user.phone} registeredAt={user.registeredAt} roleId={user.roleId} />)]}
+					tablePoints={[
+						users.map((user) => (
+							<UserRow
+								key={user.login}
+								id={user.id}
+								login={user.login}
+								reservePass={user.reservePass as string}
+								phone={user.phone}
+								registeredAt={user.registeredAt}
+								roleId={user.roleId}
+							/>
+						)),
+					]}
 					isSwitcher={false}
 					isSearch={false}
 				/>

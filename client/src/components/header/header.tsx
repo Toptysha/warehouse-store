@@ -2,13 +2,12 @@ import { useSelector } from 'react-redux';
 import { selectUser } from '../../redux/selectors';
 import { useAppDispatch } from '../../redux/store';
 import { logout, openLoader } from '../../redux/reducers';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ACCESS, COLORS, ROLE } from '../../constants';
 import hangerLogo from '../../images/hanger-logo.png';
 import beautyLogo from '../../images/beauty-logo.png';
 import arrowsDown from '../../images/arrows.png';
 import styled from 'styled-components';
-import { NameMenuPoint } from './components';
 import { request } from '../../utils';
 import { useEffect, useRef, useState } from 'react';
 
@@ -34,30 +33,16 @@ export const Header = () => {
 
 	const user = useSelector(selectUser);
 
+	const onClick = () => {
+		dispatch(openLoader());
+		setIsVisible(false);
+	};
+
 	const onLogout = () => {
-		navigate('/login');
 		request('/logout', 'POST').then(() => {
 			dispatch(logout());
 			setIsVisible(false);
 		});
-	};
-
-	const onUsers = () => {
-		dispatch(openLoader());
-		setIsVisible(false);
-		navigate('/users');
-	};
-
-	const onSchedule = () => {
-		dispatch(openLoader());
-		setIsVisible(false);
-		navigate('/schedule');
-	};
-
-	const onLogs = () => {
-		dispatch(openLoader());
-		setIsVisible(false);
-		navigate('/logs');
 	};
 
 	return user.roleId !== ROLE.GUEST ? (
@@ -74,11 +59,27 @@ export const Header = () => {
 					</div>
 					{isVisible && (
 						<div className="name-menu" ref={divRef}>
-							{/* <NameMenuPoint onClick={() => {}} description="Управление аккаунтом" /> */}
-							{ACCESS.USERS.includes(user.roleId as string) && <NameMenuPoint onClick={onUsers} description="Управление пользователями" />}
-							{ACCESS.EDIT_SCHEDULES.includes(user.roleId as string) && <NameMenuPoint onClick={onSchedule} description="График работы продавцов" />}
-							{ACCESS.LOGS.includes(user.roleId as string) && <NameMenuPoint onClick={onLogs} description="Журнал действий" />}
-							<NameMenuPoint onClick={onLogout} description="Выйти" />
+							<Link to="/account_exchange">
+								<div onClick={onClick}>Управление аккаунтом</div>
+							</Link>
+							{ACCESS.USERS.includes(user.roleId as string) && (
+								<Link to="/users">
+									<div onClick={onClick}>Управление пользователями</div>
+								</Link>
+							)}
+							{ACCESS.EDIT_SCHEDULES.includes(user.roleId as string) && (
+								<Link to="/schedule">
+									<div onClick={onClick}>График работы продавцов</div>
+								</Link>
+							)}
+							{ACCESS.LOGS.includes(user.roleId as string) && (
+								<Link to="/logs">
+									<div onClick={onClick}>Журнал действий</div>
+								</Link>
+							)}
+							<Link to="/login">
+								<div onClick={onLogout}>Выйти</div>
+							</Link>
 						</div>
 					)}
 				</div>
@@ -143,15 +144,27 @@ const HeaderContainer = styled.div`
 	}
 
 	& .name-menu {
+		width: 200px;
 		position: absolute;
 		right: 0;
 		top: 60px;
 		background: #fefefe;
 		font-size: 14px;
+		text-align: right;
+	}
+
+	& .name-menu a {
+		background: red;
+		text-decoration: none;
+		color: #000;
+	}
+
+	& .name-menu div {
+		cursor: pointer;
+		padding: 5px;
 	}
 
 	& .name-menu div:hover {
 		background: ${COLORS.HEADER};
-		cursor: pointer;
 	}
 `;
