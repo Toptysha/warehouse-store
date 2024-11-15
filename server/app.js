@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const routes = require("./routes");
 const { photosDirectory } = require("./controllers/photos");
@@ -8,8 +9,9 @@ const PORT = process.env.PORT || 7000;
 
 const app = express();
 
-app.use(express.static("../client/build"));
+// app.use(express.static("../client/build"));
 
+app.use(cors({ origin: process.env.CLIENT_URL }));
 app.use(express.json());
 app.use(cookieParser());
 
