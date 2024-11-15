@@ -5,7 +5,7 @@ FROM node:18
 WORKDIR /usr/src/app
 
 # Скопируйте файлы сервера в контейнер
-COPY ./server ./
+COPY . .
 
 # Установите зависимости
 RUN npm install

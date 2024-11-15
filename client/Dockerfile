@@ -5,7 +5,7 @@ FROM node:18 AS builder
 WORKDIR /usr/src/app
 
 # Скопируйте все файлы клиента в контейнер
-COPY ./client ./
+COPY . .
 
 # Установите зависимости и соберите клиент
 RUN npm install
