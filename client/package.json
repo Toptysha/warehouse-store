@@ -2,7 +2,7 @@
 	"name": "warehouse-store",
 	"version": "0.1.0",
 	"private": true,
-	"proxy": "http://localhost:7000",
+	"proxy": "http://server-service:7000",
 	"dependencies": {
 		"@hookform/resolvers": "^3.3.4",
 		"@reduxjs/toolkit": "^2.2.3",
