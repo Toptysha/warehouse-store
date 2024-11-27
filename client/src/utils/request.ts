@@ -1,5 +1,5 @@
 export const request = (url: string, method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH', data?: any) => {
-	return fetch(url, {
+	return fetch(`http://server.warehouse-store.online${url}`, {
 		headers: {
 			'Content-Type': 'application/json',
 		},

@@ -1,5 +1,6 @@
 import { PHOTO_TYPES } from "../constants";
 import { PhotoType } from "../interfaces";
+import { request } from "./request";
 
 export const uploadPhotos = async (id: string, typePhotos: PhotoType, selectedFiles: File[], currentSize?: string) => {
 		const formData = new FormData();
@@ -13,10 +14,7 @@ export const uploadPhotos = async (id: string, typePhotos: PhotoType, selectedFi
 			formData.append('currentSize', currentSize as string);
 		}
 
-		return await fetch('/products/photos', {
-			method: 'POST',
-			body: formData,
-		})
+		return await request('/products/photos', 'POST', formData)
 			.then((response) => response.json())
 			.catch((error) => {
 				console.log(error);

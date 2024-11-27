@@ -126,10 +126,7 @@ export const ProductCreate = () => {
 			formData.append('currentSize', size);
 		}
 
-		return await fetch('/products/photos', {
-			method: 'POST',
-			body: formData,
-		}).then((response) => response.json());
+		return await request('/products/photos', 'POST', formData).then((response) => response.json());
 	}
 
 	async function uploadMeasurements(folderName: string) {

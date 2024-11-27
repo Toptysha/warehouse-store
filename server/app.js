@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const routes = require("./routes");
-const { photosDirectory } = require("./controllers/photos");
+// const { photosDirectory } = require("./controllers/photos");
 
 const PORT = process.env.PORT || 7000;
 
@@ -16,6 +16,6 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/", routes);
-app.use("/photos", express.static(photosDirectory()));
+// app.use("/photos", express.static(photosDirectory()));
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
