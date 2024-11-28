@@ -11,7 +11,7 @@ export const Location = () => {
 
 	const route = () => {
 		const arrOfPath = pathname.split('/');
-		let paths = ['http://localhost:3000'];
+		let paths = ['https://warehouse-store.online'];
 		let names = ['Home'];
 
 		arrOfPath.forEach((element, index) => {
