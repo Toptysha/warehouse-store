@@ -29,11 +29,13 @@ router.post("/register", async (req, res) => {
       .cookie("accessToken", accessToken, {
         maxAge: TOKENS_LIFE.ACCESS,
         httpOnly: true,
+        domain: ".warehouse-store.online",
         secure: true, // при использовании https
       })
       .cookie("refreshToken", refreshToken, {
         maxAge: TOKENS_LIFE.REFRESH,
         httpOnly: true,
+        domain: ".warehouse-store.online",
         secure: true,
       })
       .send({ error: null, data: mapUser(user) });
@@ -53,11 +55,13 @@ router.post("/login", async (req, res) => {
       .cookie("accessToken", accessToken, {
         maxAge: TOKENS_LIFE.ACCESS,
         httpOnly: true,
+        domain: ".warehouse-store.online",
         secure: true, // при использовании https
       })
       .cookie("refreshToken", refreshToken, {
         maxAge: TOKENS_LIFE.REFRESH,
         httpOnly: true,
+        domain: ".warehouse-store.online",
         secure: true,
       })
       .send({ error: null, data: mapUser(user) });
