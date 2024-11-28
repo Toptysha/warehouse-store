@@ -29,12 +29,12 @@ router.post("/register", async (req, res) => {
       .cookie("accessToken", accessToken, {
         maxAge: TOKENS_LIFE.ACCESS,
         httpOnly: true,
-        // secure: true, // при использовании https
+        secure: true, // при использовании https
       })
       .cookie("refreshToken", refreshToken, {
         maxAge: TOKENS_LIFE.REFRESH,
         httpOnly: true,
-        // secure: true,
+        secure: true,
       })
       .send({ error: null, data: mapUser(user) });
   } catch (err) {
@@ -53,12 +53,12 @@ router.post("/login", async (req, res) => {
       .cookie("accessToken", accessToken, {
         maxAge: TOKENS_LIFE.ACCESS,
         httpOnly: true,
-        // secure: true, // при использовании https
+        secure: true, // при использовании https
       })
       .cookie("refreshToken", refreshToken, {
         maxAge: TOKENS_LIFE.REFRESH,
         httpOnly: true,
-        // secure: true,
+        secure: true,
       })
       .send({ error: null, data: mapUser(user) });
   } catch (err) {
