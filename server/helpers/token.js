@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { prisma } = require("../prisma-service");
 const TOKENS_LIFE = require("../constants/tokens-time-life");
+const MAIN_DATA = require("../prod-dev-data");
 
 const generateTokens = (data) => ({
   accessToken: jwt.sign(data, process.env.JWT_ACCESS_SECRET, {
@@ -52,18 +53,8 @@ const setTokensInDbAndCookie = async (req, res) => {
   });
 
   res
-    .cookie("accessToken", accessToken, {
-      maxAge: TOKENS_LIFE.ACCESS,
-      httpOnly: true,
-      domain: ".warehouse-store.online",
-      secure: true, // при использовании https
-    })
-    .cookie("refreshToken", refreshToken, {
-      maxAge: TOKENS_LIFE.REFRESH,
-      httpOnly: true,
-      domain: ".warehouse-store.online",
-      secure: true,
-    });
+    .cookie("accessToken", accessToken, MAIN_DATA.ACCESS_TOKEN_PARAMS)
+    .cookie("refreshToken", refreshToken, MAIN_DATA.REFRESH_TOKEN_PARAMS);
 
   return user;
 };

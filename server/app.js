@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const routes = require("./routes");
+// const MAIN_DATA = require("./prod-dev-data");
 // const { photosDirectory } = require("./controllers/photos");
 
 const PORT = process.env.PORT || 7000;

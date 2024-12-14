@@ -14,7 +14,7 @@ export const uploadPhotos = async (id: string, typePhotos: PhotoType, selectedFi
 			formData.append('currentSize', currentSize as string);
 		}
 
-		return await request('/products/photos', 'POST', formData)
+		return await request('/products/photos', 'POST', formData, true)
 			.then((response) => response.json())
 			.catch((error) => {
 				console.log(error);

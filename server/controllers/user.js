@@ -164,7 +164,7 @@ async function findTokenByUserId(userId) {
 }
 
 function findUserByToken(token) {
-  return prisma.user.findUnique({
+  return prisma.user.findFirst({
     where: { token },
   });
 }

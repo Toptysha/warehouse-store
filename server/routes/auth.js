@@ -14,6 +14,7 @@ const {
   checkTimeToEndAccessToken,
 } = require("../helpers/token");
 const TOKENS_LIFE = require("../constants/tokens-time-life");
+const MAIN_DATA = require("../prod-dev-data");
 
 const router = express.Router({ mergeParams: true });
 
@@ -26,18 +27,8 @@ router.post("/register", async (req, res) => {
     );
 
     res
-      .cookie("accessToken", accessToken, {
-        maxAge: TOKENS_LIFE.ACCESS,
-        httpOnly: true,
-        domain: ".warehouse-store.online",
-        secure: true, // при использовании https
-      })
-      .cookie("refreshToken", refreshToken, {
-        maxAge: TOKENS_LIFE.REFRESH,
-        httpOnly: true,
-        domain: ".warehouse-store.online",
-        secure: true,
-      })
+      .cookie("accessToken", accessToken, MAIN_DATA.ACCESS_TOKEN_PARAMS)
+      .cookie("refreshToken", refreshToken, MAIN_DATA.REFRESH_TOKEN_PARAMS)
       .send({ error: null, data: mapUser(user) });
   } catch (err) {
     res.send({ error: err.message || "Unknown Error" });
@@ -52,18 +43,8 @@ router.post("/login", async (req, res) => {
     );
 
     res
-      .cookie("accessToken", accessToken, {
-        maxAge: TOKENS_LIFE.ACCESS,
-        httpOnly: true,
-        domain: ".warehouse-store.online",
-        secure: true, // при использовании https
-      })
-      .cookie("refreshToken", refreshToken, {
-        maxAge: TOKENS_LIFE.REFRESH,
-        httpOnly: true,
-        domain: ".warehouse-store.online",
-        secure: true,
-      })
+      .cookie("accessToken", accessToken, MAIN_DATA.ACCESS_TOKEN_PARAMS)
+      .cookie("refreshToken", refreshToken, MAIN_DATA.REFRESH_TOKEN_PARAMS)
       .send({ error: null, data: mapUser(user) });
   } catch (err) {
     res.send({ error: err.message || "Unknown Error" });
@@ -72,7 +53,7 @@ router.post("/login", async (req, res) => {
 
 router.post("/logout", async (req, res) => {
   const user = await findUserByToken(req.cookies.refreshToken);
-  await editUser(user.id, { token: "" });
+  await editUser(user.id, { token: null });
   res.clearCookie("accessToken").clearCookie("refreshToken").send({});
 });
 

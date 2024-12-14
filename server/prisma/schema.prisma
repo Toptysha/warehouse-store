@@ -20,7 +20,7 @@ model User {
   password    String
   reservePass String         @unique
   role        Int            @default(4)
-  token       String         @unique
+  token       String?
   color       String?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @default(now())
@@ -28,7 +28,7 @@ model User {
   order       Order[]
   log         Log[]
   schedules   ScheduleUser[]
-  schedul     Schedule[]
+  schedule    Schedule[]
 }
 
 model Product {

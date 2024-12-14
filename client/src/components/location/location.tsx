@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { selectUser } from '../../redux/selectors';
 import { ROLE } from '../../constants';
+import { MAIN_DATA } from '../../prod-dev-data';
 
 export const Location = () => {
 	const user = useSelector(selectUser);
@@ -11,7 +12,7 @@ export const Location = () => {
 
 	const route = () => {
 		const arrOfPath = pathname.split('/');
-		let paths = ['https://warehouse-store.online'];
+		let paths = [MAIN_DATA.url];
 		let names = ['Home'];
 
 		arrOfPath.forEach((element, index) => {

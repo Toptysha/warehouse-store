@@ -126,7 +126,14 @@ export const ProductCreate = () => {
 			formData.append('currentSize', size);
 		}
 
-		return await request('/products/photos', 'POST', formData).then((response) => response.json());
+		console.log('TEST_00', folderName, files, photoType, size);
+		console.log('TEST_11', formData);
+		for (let [key, value] of formData.entries()) {
+			console.log('TEST_22', key, value);
+		}
+
+		// return await request('/products/photos', 'POST', formData).then((response) => response.json());
+		return await request('/products/photos', 'POST', formData, true).then((response) => console.log(response));
 	}
 
 	async function uploadMeasurements(folderName: string) {
