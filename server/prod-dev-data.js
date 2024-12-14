@@ -2,7 +2,7 @@ require("dotenv").config();
 const TOKENS_LIFE = require("./constants/tokens-time-life");
 
 // PROD-DATA
-const RESERVED_DATA = {
+const MAIN_DATA = {
   ACCESS_TOKEN_PARAMS: {
     maxAge: TOKENS_LIFE.ACCESS,
     httpOnly: true,
@@ -18,7 +18,7 @@ const RESERVED_DATA = {
 };
 
 // DEV-DATA
-const MAIN_DATA = {
+const RESERVED_DATA = {
   ACCESS_TOKEN_PARAMS: {
     maxAge: TOKENS_LIFE.ACCESS,
     httpOnly: true,
