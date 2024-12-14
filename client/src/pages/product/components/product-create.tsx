@@ -132,7 +132,6 @@ export const ProductCreate = () => {
 			console.log('TEST_22', key, value);
 		}
 
-		// return await request('/products/photos', 'POST', formData).then((response) => response.json());
 		return await request('/products/photos', 'POST', formData, true).then((response) => console.log(response));
 	}
 

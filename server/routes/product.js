@@ -186,24 +186,8 @@ router.post(
   hasRole(ACCESS.EDIT_PRODUCTS),
   upload.any(),
   async (req, res) => {
-    console.log(
-      "PPP",
-      req.body,
-      req.files,
-      req.body.folder,
-      req.body.typePhotos,
-      req.body.currentSize
-    );
     try {
       const product = await getProduct(req.body.folder);
-
-      // console.log(
-      //   "PPP",
-      //   req.files,
-      //   req.body.folder,
-      //   req.body.typePhotos,
-      //   req.body.currentSize
-      // );
 
       await addPhotos({
         photos: req.files,
